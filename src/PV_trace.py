@@ -1,16 +1,31 @@
 import chess, chess.engine
+import yaml
+
 import engine
 import simple
 import printBoard
 
-def tracePV(startfen: str, MAX_MOVES=20, depth:int=None, nodes:int=None, time:int=None, mate:int=None, print_board=True):
+def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int=None, time:int=None, mate:int=None,
+            print_board=True, stop_on_tbhit=True):
     """
     'Trace' the PV of a given FEN and keep calculating the next PV. This repeats until the end of the game
     or until the maximum number of iterations is reached.
     """
-    MAX_ITER = 40
     board = chess.Board(startfen)
     
+    if not depth:
+        depth = None
+    if not nodes:
+        nodes = None
+    if not time:
+        time = None
+    if not mate:
+        mate = None
+    
+    # if no parameters are given, default to 10 seconds
+    if not depth and not nodes and not time and not mate:
+        time = 10
+        
     i = 1
     while i <= MAX_ITER:
         info: chess.engine.InfoDict = engine.__engine__(board.fen(), depth=depth, nodes=nodes, time=time, mate=mate)
@@ -33,6 +48,13 @@ def tracePV(startfen: str, MAX_MOVES=20, depth:int=None, nodes:int=None, time:in
         print(f"Iteration {i} | Traced FEN: {board.fen()}")
         if print_board:
             printBoard.printBoard(board.fen())
+            
+        if board.is_game_over(claim_draw=True):
+            print("Game over, stopping!")
+            return
+        if stop_on_tbhit and len(board.piece_map()) <= 7:
+            print("Tablebase position reached (<= 7 pieces), stopping!")
+            return
         
         i += 1
         
@@ -42,7 +64,22 @@ def main():
     startfen = input("FEN > ")
     
     # Sample usage
-    tracePV(startfen, depth=30, MAX_MOVES=10)
+    # tracePV(startfen, depth=30, MAX_MOVES=10)
+    
+    with open("config.yml", "r") as f:
+        config = yaml.safe_load(f)
+        depth = int(config["DEPTH"])
+        nodes = int(config["NODES"])
+        time = int(config["TIME"])
+        mate = int(config["MATE"])
+        max_moves = int(config["MAX_MOVES"])
+        max_iter = int(config["MAX_ITER"])
+        print_board = bool(config["PRINT_BOARD"])
+        stop_on_tbhit = bool(config["STOP_ON_TBHIT"])
+        
+        
+    tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter, print_board=print_board)
+    
     
     
 if __name__ == "__main__":

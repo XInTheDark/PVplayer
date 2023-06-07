@@ -16,6 +16,6 @@ python3 PV_trace.py
 ```
 
 ### Configuration
-There are many terms in PV_trace.py that can be modified to suit your needs. 
+There are many terms in `config.yml` that can be modified to suit your needs. 
 This includes the limits for evaluation, number of PV moves to use for each iteration, etc. 
 Modifying these terms may increase or decrease the accuracy of the analysis.

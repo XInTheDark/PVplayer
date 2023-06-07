@@ -18,9 +18,6 @@ def __engine__(fen: str, depth: int=None, nodes: int=None, time: int=None, mate:
     board = chess.Board(fen)
     
     # 3. Create a new limit
-    # if all values are None, then default to 10 seconds
-    if not depth and not nodes and not time and not mate:
-        time = 10
     limit = chess.engine.Limit(depth=depth, nodes=nodes, time=time, mate=mate)
     
     # 4. Evaluate with engine
