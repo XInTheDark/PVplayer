@@ -1,6 +1,6 @@
 ## PVplayer
 
-A simple tool for chess analysis that uses a chess engine such as [Stockfish](github.com/official-stockfish/Stockfish) 
+A simple tool for chess analysis that uses a chess engine such as [Stockfish](https://www.github.com/official-stockfish/Stockfish) 
 to keep calculating the best lines starting from a position.
 It can be used to provide a close estimation of a position's evaluation, 
 and can be more accurate than the engine's evaluation in one iteration.
