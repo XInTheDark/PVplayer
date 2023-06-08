@@ -4,9 +4,10 @@ import yaml
 import engine
 import simple
 import printBoard
+import query_tb
 
 def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int=None, time:int=None, mate:int=None,
-            print_board=True, stop_on_tbhit=True):
+            print_board=True, stop_on_tbhit=True, query_on_tbhit=True):
     """
     'Trace' the PV of a given FEN and keep calculating the next PV. This repeats until the end of the game
     or until the maximum number of iterations is reached.
@@ -52,6 +53,34 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         if board.is_game_over(claim_draw=True):
             print("Game over, stopping!")
             return
+
+        # Query tablebase if possible
+        if query_on_tbhit and len(board.piece_map()) <= 7:
+            print("Tablebase position reached (<= 7 pieces), querying...")
+            # Get eval
+            tb_eval = query_tb.query_tablebase_eval(board)
+            if tb_eval is None:
+                print("Tablebase error, stopping!")
+                return
+
+            eval_ = tb_eval[0]
+            dtm = tb_eval[1]
+            if dtm:
+                print(f"Tablebase eval: {eval_} (DTM {dtm})")
+            else:
+                print(f"Tablebase eval: {eval_}")
+
+            # Get best line (until end of game)
+            tb_pv = query_tb.query_tablebase_pv(board)
+            if tb_pv is None:
+                print("Tablebase error, stopping!")
+                return
+
+            board = simple.push_pv(board, tb_pv)
+            print(f"Traced FEN: {board.fen()}")
+            if print_board:
+                printBoard.printBoard(board.fen())
+                
         if stop_on_tbhit and len(board.piece_map()) <= 7:
             print("Tablebase position reached (<= 7 pieces), stopping!")
             return
@@ -76,9 +105,12 @@ def main():
         max_iter = int(config["MAX_ITER"])
         print_board = bool(config["PRINT_BOARD"])
         stop_on_tbhit = bool(config["STOP_ON_TBHIT"])
+        query_on_tbhit = bool(config["QUERY_ON_TBHIT"])
         
         
-    tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter, print_board=print_board)
+    tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter,
+            print_board=print_board, stop_on_tbhit=stop_on_tbhit, query_on_tbhit=query_on_tbhit)
+    simple.write_pgn()
     
     
     
