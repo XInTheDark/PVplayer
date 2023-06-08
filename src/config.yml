@@ -3,14 +3,14 @@ ENGINE_PATH: stockfish
 # Limits (set to 0 if infinite)
 # If no limits are set, each iteration will be run for 10 seconds by default.
 # Setting more than one of these limits may result in undefined behaviour.
-DEPTH: 20
-NODES: 0
+DEPTH: 0
+NODES: 2000000
 TIME: 0
 MATE: 0  # search for mate in X moves
 
 
 # PV and output behaviour
-MAX_MOVES: 10  # number of moves to use from each PV iteration
+MAX_MOVES: 5  # number of moves to use from each PV iteration
                # Decreasing this number will provide more accurate analysis but will be slower.
 MAX_ITER: 100  # maximum number of iterations to calculate
 PRINT_BOARD: True  # whether to print the board after each iteration
