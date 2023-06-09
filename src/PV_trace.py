@@ -62,7 +62,7 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         if query_on_tbhit and len(board.piece_map()) <= 7:
             print("Tablebase position reached (<= 7 pieces), querying...")
             # Get eval
-            tb_info = query_tb.query_tablebase(board)
+            tb_info = query_tb.query_tablebase_eval(board)
             if tb_info is None:
                 print("Tablebase error when fetching eval, stopping!")
                 return
@@ -75,12 +75,13 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
                 print(f"Tablebase eval: {eval_}")
 
             # Get best line (until end of game)
-            tb_pv = tb_info[2]
+            print("Querying best line... This may take a while.")
+            tb_pv = query_tb.query_tablebase_pv(board)
             if tb_pv is None:
                 print("Tablebase error when fetching best line, stopping!")
                 return
 
-            board = utils.push_pv(board, tb_pv)
+            board = utils.push_pv(board, tb_pv, is_tb=True)
             print(f"Traced FEN: {board.fen()}")
             if print_board:
                 printBoard.printBoard(board.fen())

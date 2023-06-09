@@ -14,7 +14,7 @@ with open("config.yml", "r") as f:
     detailed_pgn = config["DETAILED_PGN"]
 
 
-def push_pv(start, pv, info=None):
+def push_pv(start, pv, info=None, is_tb=False):
     global PGN_TEXT, MOVE_COUNT
     
     board = None
@@ -26,6 +26,10 @@ def push_pv(start, pv, info=None):
     # Initialise PGN_TEXT if this is the start
     if export_pgn and not "FEN" in PGN_TEXT:
         PGN_TEXT += f"[FEN \"{board.fen()}\"]\n"
+        
+    # Add a note if this is a tablebase PV
+    if is_tb:
+        PGN_TEXT += "{ Start of tablebase PV } "
     
     if type(pv) == str:
         pv = pv.split('pv')[-1]
@@ -44,13 +48,17 @@ def push_pv(start, pv, info=None):
                 MOVE_COUNT += 1
                 
         board.push(move)
+        
+        if board.is_game_over():
+            break
+        
         rule50 += 1
         
         # Reset rule50 count because the library implementation is somewhat broken
         if board.is_capture(move):
-            rule50 = board._halfmove_clock = 0
+            rule50 = board.halfmove_clock = 0
         elif board.piece_at(move.from_square).piece_type == chess.PAWN:
-            rule50 = board._halfmove_clock = 0
+            rule50 = board.halfmove_clock = 0
             
     # Append info at end of the current PV iteration in the pgn
     if export_pgn and detailed_pgn and info is not None:
