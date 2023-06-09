@@ -1,4 +1,4 @@
-import chess
+import chess, chess.engine
 import datetime
 import yaml
 
@@ -9,9 +9,12 @@ PGN_TEXT = f"""[Event "PVplayer analysis"]
 MOVE_COUNT = 1
 
 with open("config.yml", "r") as f:
-    export_pgn = yaml.safe_load(f)["EXPORT_PGN"]
+    config = yaml.safe_load(f)
+    export_pgn = config["EXPORT_PGN"]
+    detailed_pgn = config["DETAILED_PGN"]
 
-def push_pv(start, pv):
+
+def push_pv(start, pv, info=None):
     global PGN_TEXT, MOVE_COUNT
     
     board = None
@@ -48,6 +51,11 @@ def push_pv(start, pv):
             rule50 = board._halfmove_clock = 0
         elif board.piece_at(move.from_square).piece_type == chess.PAWN:
             rule50 = board._halfmove_clock = 0
+            
+    # Append info at end of the current PV iteration in the pgn
+    if export_pgn and detailed_pgn and info is not None:
+        PGN_TEXT += f"{{ {info['score']}, depth {info['depth']}/{info['seldepth']}," \
+                    f" {info['nodes']} nodes }} "
         
     # Correct the rule50 count in FEN
     f = board.fen().split()
@@ -83,3 +91,24 @@ def write_pgn():
     """
     
     print("PGN written to /pgns!")
+
+
+def cp_to_score(cp: chess.engine.PovScore):
+    """@:return: a string of the score in pawn units"""
+    if cp.is_mate():
+        return str(cp)
+    s = str(cp.white())
+
+    if s[0] == '+':
+        s = s[1:]
+        return f"+{int(s) / 100}"
+    elif s[0] == '-':
+        s = s[1:]
+        return f"-{int(s) / 100}"
+    elif s == '0':
+        return "0.00"
+    
+    
+def nodes_to_str(nodes: int):
+    """@:return: a string of the number of nodes in millions"""
+    return f"{nodes / 1000000:.2f}M"

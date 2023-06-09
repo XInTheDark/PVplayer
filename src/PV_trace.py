@@ -2,7 +2,7 @@ import chess, chess.engine
 import yaml
 
 import engine
-import simple
+import utils
 import printBoard
 import query_tb
 
@@ -23,9 +23,9 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
     if not mate:
         mate = None
     
-    # if no parameters are given, default to 10 seconds
+    # if no parameters are given, default to 2M nodes
     if not depth and not nodes and not time and not mate:
-        time = 10
+        nodes = 2000000
         
     i = 1
     while i <= MAX_ITER:
@@ -33,17 +33,17 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         pv = info["pv"]
         # only take the first MAX_MOVES of the pv because it can be increasingly unreliable
         pv = pv[:MAX_MOVES]
-        board = simple.push_pv(board, pv)
         
         # other related info
-        score = info["score"]  # type chess.engine.PovScore
-        score = str(score.white())  # in CP
+        score = info["score"] = utils.cp_to_score(info["score"])  # type: str
         
         _depth = info["depth"]
         _seldepth = info["seldepth"]
-        _nodes = info["nodes"]
-        _nps = info["nps"]
+        _nodes = info["nodes"] = utils.nodes_to_str(info["nodes"])  # type: str
+        _nps = info["nps"] = utils.nodes_to_str(info["nps"])  # type: str
         _time = info["time"]
+
+        board = utils.push_pv(board, pv, info)
         
         print(f"Iteration {i} | Eval: {score} | depth: {_depth}/{_seldepth} | nodes: {_nodes} (nps {_nps}) | time: {_time}s")
         print(f"Iteration {i} | Traced FEN: {board.fen()}")
@@ -76,7 +76,7 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
                 print("Tablebase error, stopping!")
                 return
 
-            board = simple.push_pv(board, tb_pv)
+            board = utils.push_pv(board, tb_pv)
             print(f"Traced FEN: {board.fen()}")
             if print_board:
                 printBoard.printBoard(board.fen())
@@ -91,6 +91,8 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
     
 def main():
     startfen = input("FEN > ")
+    if not startfen:
+        startfen = chess.STARTING_FEN
     
     # Sample usage
     # tracePV(startfen, depth=30, MAX_MOVES=10)
@@ -110,7 +112,7 @@ def main():
         
     tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter,
             print_board=print_board, stop_on_tbhit=stop_on_tbhit, query_on_tbhit=query_on_tbhit)
-    simple.write_pgn()
+    utils.write_pgn()
     
     
     
