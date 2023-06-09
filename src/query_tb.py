@@ -2,8 +2,10 @@ import chess
 import requests
 
 
-def query_tablebase_eval(pos: chess.Board):
-    """Query the online tablebase for the position and return the evaluation."""
+def query_tablebase(pos: chess.Board):
+    """Query the online tablebase for the position.
+    :return: TB evaluation + best line
+    """
     """https://github.com/lichess-org/lila-tablebase"""
     
     FEN = pos.fen()
@@ -17,21 +19,11 @@ def query_tablebase_eval(pos: chess.Board):
     except KeyError:
         return None
     
-    return eval_, dtm_
-
-
-def query_tablebase_pv(pos: chess.Board):
-    """Query the online tablebase for the position and return the best line."""
-    
-    FEN = pos.fen()
-    LINK = "https://tablebase.lichess.ovh/standard/mainline?fen=" + FEN
-    r = requests.get(LINK, timeout=10)
-    j = r.json()
-    
+    pv = []
     try:
-        pv = j["mainline"]
+        pv = j["moves"]
         pv = [chess.Move.from_uci(d["uci"]) for d in pv]
     except KeyError:
-        return None
+        pv = []
     
-    return pv
+    return eval_, dtm_, pv

@@ -60,22 +60,22 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         if query_on_tbhit and len(board.piece_map()) <= 7:
             print("Tablebase position reached (<= 7 pieces), querying...")
             # Get eval
-            tb_eval = query_tb.query_tablebase_eval(board)
-            if tb_eval is None:
-                print("Tablebase error, stopping!")
+            tb_info = query_tb.query_tablebase(board)
+            if tb_info is None:
+                print("Tablebase error when fetching eval, stopping!")
                 return
 
-            eval_ = tb_eval[0]
-            dtm = tb_eval[1]
+            eval_ = tb_info[0]
+            dtm = tb_info[1]
             if dtm:
                 print(f"Tablebase eval: {eval_} (DTM {dtm})")
             else:
                 print(f"Tablebase eval: {eval_}")
 
             # Get best line (until end of game)
-            tb_pv = query_tb.query_tablebase_pv(board)
+            tb_pv = tb_info[2]
             if tb_pv is None:
-                print("Tablebase error, stopping!")
+                print("Tablebase error when fetching best line, stopping!")
                 return
 
             board = utils.push_pv(board, tb_pv)
