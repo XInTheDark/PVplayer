@@ -104,7 +104,7 @@ def write_pgn():
 def cp_to_score(cp: chess.engine.PovScore):
     """@:return: a string of the score in pawn units"""
     if cp.is_mate():
-        return str(cp)
+        return str(cp.white())
     s = str(cp.white())
 
     if s[0] == '+':
