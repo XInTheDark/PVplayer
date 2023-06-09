@@ -93,9 +93,9 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         else:
             drawn_moves_count = 0
         
-        if stop_on_draw:
+        if stop_on_draw > 0:
             if drawn_moves_count >= stop_on_draw:
-                print(f"Drawn for {stop_on_draw} consecutive iterations, stopping!")
+                print(f"Drawn for {drawn_moves_count} consecutive iterations, stopping!")
                 return
         
         i += 1
@@ -125,7 +125,7 @@ def main():
         
         
     tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter,
-            print_board=print_board, stop_on_tbhit=stop_on_tbhit, query_on_tbhit=query_on_tbhit)
+            print_board=print_board, stop_on_tbhit=stop_on_tbhit, query_on_tbhit=query_on_tbhit, stop_on_draw=stop_on_draw)
     utils.write_pgn()
     
     
