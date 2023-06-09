@@ -5,6 +5,22 @@ such as [Stockfish](https://github.com/official-stockfish/Stockfish) or [Lc0](ht
 to keep calculating the best lines starting from a position using a creative 'iterative iterative deepening' approach.
 It can even be used to provide a more accurate evaluation of a position than the engine.
 
+### How it works
+Modern chess engines are extremely good at calculating the best move in a position.
+However, one of its main weaknesses is evaluation. This tool is used to fix the following two main problems:
+1) Evaluation can be unreliable.
+This means that even though the best moves are usually very stable, the evaluation can fluctuate a lot in some positions.
+This tool solves this problem by forcing the engine to re-evaluate the position after every few best moves are played,
+resulting in increasingly accurate evaluation as the game progresses.
+For instance, PVplayer with 10 iterations and 100 million nodes per iteration
+usually provides a more accurate evaluation than Stockfish with 1 billion nodes, especially in complicated positions
+where over-pruning causes a single search run to be unreliable.
+2) Evaluation can be vague and meaningless. Especially after the
+[Stockfish eval was normalized](https://github.com/official-stockfish/Stockfish/commit/ad2aa8c),
+a +1.0 eval is now tied to a "50% win probability". This causes a huge problem for human users who have no idea whether
+this +1.0 eval is enough to force a win. PVplayer solves this problem by running the search deep enough into the game
+to calculate to a tablebase position where the Win/Loss/Draw is confirmed.
+
 ### Requirements
 - `python-chess` library
 - An executable chess engine (e.g. Stockfish). The path to the executable can be modified in [config.yml](src/config.yml).
