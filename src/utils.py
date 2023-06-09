@@ -109,6 +109,18 @@ def cp_to_score(cp: chess.engine.PovScore):
         return "0.00"
     
 
+def score_to_cp(score: str):
+    """@:return: integer score in centipawns"""
+    if score == "0.00" or score == "0":
+        return 0
+    if score[0] == '+':
+        return int(float(score[1:]) * 100)
+    elif score[0] == '-':
+        return int(-float(score[1:]) * 100)
+    else:
+        return score
+    
+
 def is_drawn_score(score):
     return score == "0.00" or score == "0" or score == 0 or score == chess.engine.Cp(0)
     

@@ -7,7 +7,8 @@ import printBoard
 import query_tb
 
 def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int=None, time:int=None, mate:int=None,
-            print_board=True, stop_on_tbhit=True, query_on_tbhit=True, stop_on_draw=0):
+            print_board=True, stop_on_tbhit=True, query_on_tbhit=True,
+            stop_on_draw=0, stop_on_eval=0):
     """
     'Trace' the PV of a given FEN and keep calculating the next PV. This repeats until the end of the game
     or until the maximum number of iterations is reached.
@@ -37,6 +38,7 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         pv = pv[:MAX_MOVES]
         
         # other related info
+        score_is_mate = info["score"].is_mate()
         score = info["score"] = utils.cp_to_score(info["score"])  # type: str
         
         _depth = info["depth"]
@@ -93,9 +95,13 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         else:
             drawn_moves_count = 0
         
-        if stop_on_draw > 0:
+        if stop_on_draw:
             if drawn_moves_count >= stop_on_draw:
                 print(f"Drawn for {drawn_moves_count} consecutive iterations, stopping!")
+                return
+        if stop_on_eval:
+            if score_is_mate or abs(utils.score_to_cp(score)) >= abs(stop_on_eval):
+                print(f"Eval exceeded threshold: {stop_on_eval}, stopping!")
                 return
         
         i += 1
@@ -122,10 +128,12 @@ def main():
         stop_on_tbhit = bool(config["STOP_ON_TBHIT"])
         query_on_tbhit = bool(config["QUERY_ON_TBHIT"])
         stop_on_draw = int(config["STOP_ON_DRAW"])
+        stop_on_eval = int(config["STOP_ON_EVAL"])
         
         
     tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter,
-            print_board=print_board, stop_on_tbhit=stop_on_tbhit, query_on_tbhit=query_on_tbhit, stop_on_draw=stop_on_draw)
+            print_board=print_board, stop_on_tbhit=stop_on_tbhit, query_on_tbhit=query_on_tbhit,
+            stop_on_draw=stop_on_draw, stop_on_eval=stop_on_eval)
     utils.write_pgn()
     
     

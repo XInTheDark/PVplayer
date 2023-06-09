@@ -22,6 +22,8 @@ QUERY_ON_TBHIT: True  # whether to query the online Lichess tablebase
 STOP_ON_DRAW: 5  # stop searching if the last X consecutive iterations all returned 0.00 eval
                  # (useful to save computing time if the position is a dead draw)
                  # set to 0 to disable
+STOP_ON_EVAL: 300  # stop searching if absolute value of the eval is >= X (in centipawns)
+                   # set to 0 to disable
 
 EXPORT_PGN: True  # whether to export the game to a PGN after the analysis is complete
                   # (the PGN will be saved in /pgns)
