@@ -108,6 +108,10 @@ def cp_to_score(cp: chess.engine.PovScore):
     elif s == '0':
         return "0.00"
     
+
+def is_drawn_score(score):
+    return score == "0.00" or score == "0" or score == 0 or score == chess.engine.Cp(0)
+    
     
 def nodes_to_str(nodes: int):
     """@:return: a string of the number of nodes in millions"""

@@ -7,7 +7,7 @@ import printBoard
 import query_tb
 
 def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int=None, time:int=None, mate:int=None,
-            print_board=True, stop_on_tbhit=True, query_on_tbhit=True):
+            print_board=True, stop_on_tbhit=True, query_on_tbhit=True, stop_on_draw=0):
     """
     'Trace' the PV of a given FEN and keep calculating the next PV. This repeats until the end of the game
     or until the maximum number of iterations is reached.
@@ -28,6 +28,8 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
         nodes = 2000000
         
     i = 1
+    drawn_moves_count = 0
+    
     while i <= MAX_ITER:
         info: chess.engine.InfoDict = engine.__engine__(board.fen(), depth=depth, nodes=nodes, time=time, mate=mate)
         pv = info["pv"]
@@ -85,6 +87,17 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
             print("Tablebase position reached (<= 7 pieces), stopping!")
             return
         
+        
+        if utils.is_drawn_score(score):
+            drawn_moves_count += 1
+        else:
+            drawn_moves_count = 0
+        
+        if stop_on_draw:
+            if drawn_moves_count >= stop_on_draw:
+                print(f"Drawn for {stop_on_draw} consecutive iterations, stopping!")
+                return
+        
         i += 1
         
     
@@ -108,6 +121,7 @@ def main():
         print_board = bool(config["PRINT_BOARD"])
         stop_on_tbhit = bool(config["STOP_ON_TBHIT"])
         query_on_tbhit = bool(config["QUERY_ON_TBHIT"])
+        stop_on_draw = int(config["STOP_ON_DRAW"])
         
         
     tracePV(startfen, depth=depth, nodes=nodes, time=time, mate=mate, MAX_MOVES=max_moves, MAX_ITER=max_iter,
