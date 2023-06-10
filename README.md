@@ -1,4 +1,8 @@
-## PVplayer
+<div align="center">
+  <h2>PVplayer</h2>
+  A free and powerful chess analysis tool.
+</div>
+<br>
 
 A revolutionary new tool for chess analysis that uses a chess engine
 such as [Stockfish](https://github.com/official-stockfish/Stockfish) or [Lc0](https://github.com/LeelaChessZero/lc0)
