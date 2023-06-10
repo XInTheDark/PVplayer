@@ -1,12 +1,13 @@
 import chess, chess.engine
 import yaml
+import utils
 
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
     ENGINE_PATH = config["ENGINE_PATH"]
     engine_options = config["ENGINE_OPTIONS"]
 
-def __engine__(fen: str, depth: int=None, nodes: int=None, time: int=None, mate: int=None):
+def __engine__(fen: str=None, depth: int=None, nodes: int=None, time: int=None, mate: int=None):
     """
     fen: FEN string
     depth: depth to search to
@@ -27,7 +28,12 @@ def __engine__(fen: str, depth: int=None, nodes: int=None, time: int=None, mate:
     limit = chess.engine.Limit(depth=depth, nodes=nodes, time=time, mate=mate)
     
     # 4. Evaluate with engine
-    result = engine.analyse(board, limit=limit)
+    # We prefer to pass the entire moves list to the engine, so that it is not
+    # blind to threefold repetition.
+    if fen:
+        result = engine.analyse(board, limit)
+    else:  # we use ROOT_BOARD in order to preserve move stack
+        result = engine.analyse(utils.ROOT_BOARD, limit)
     
     # 5. Close the engine
     engine.quit()

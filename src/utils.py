@@ -2,6 +2,8 @@ import chess, chess.engine
 import datetime
 import yaml
 
+ROOT_BOARD = None
+
 PGN_TEXT = f"""[Event "PVplayer analysis"]
 [Site "https://github.com/XInTheDark/PVplayer"]
 [Date "{datetime.datetime.now().strftime('%Y.%m.%d')}"]
@@ -15,7 +17,7 @@ with open("config.yml", "r") as f:
 
 
 def push_pv(start, pv, info=None, is_tb=False):
-    global PGN_TEXT, MOVE_COUNT
+    global PGN_TEXT, MOVE_COUNT, ROOT_BOARD
     
     board = None
     if type(start) == str:
@@ -26,6 +28,8 @@ def push_pv(start, pv, info=None, is_tb=False):
     # Initialise PGN_TEXT if this is the start
     if export_pgn and not "FEN" in PGN_TEXT:
         PGN_TEXT += f"[FEN \"{board.fen()}\"]\n"
+    if ROOT_BOARD is None:
+        ROOT_BOARD = chess.Board(board.fen())
         
     # Add a note if this is a tablebase PV
     if is_tb:
@@ -49,7 +53,7 @@ def push_pv(start, pv, info=None, is_tb=False):
                 
         board.push(move)
         
-        if board.is_game_over():
+        if board.is_game_over(claim_draw=True):
             break
         
         rule50 += 1
@@ -69,6 +73,8 @@ def push_pv(start, pv, info=None, is_tb=False):
     f = board.fen().split()
     f[-2] = str(rule50)
     f = ' '.join(f)
+    
+    ROOT_BOARD = board
     
     return chess.Board(f)
 

@@ -12,14 +12,14 @@ MATE: 0  # search for mate in X moves
 # Search, PV and output behaviour
 MAX_MOVES: 5  # number of moves to use from each PV iteration
                # Decreasing this number will provide more accurate analysis but will be slower.
-MAX_ITER: 100  # maximum number of iterations to calculate
+MAX_ITER: 250  # maximum number of iterations to calculate
 PRINT_BOARD: True  # whether to print the board after each iteration
 
 STOP_ON_TBHIT: True  # whether to stop searching if a tablebase position
                      # (i.e. one with <= 7 pieces) is reached
 QUERY_ON_TBHIT: True  # whether to query the online Lichess tablebase
                       # if a tablebase position is reached
-STOP_ON_DRAW: 5  # stop searching if the last X consecutive iterations all returned 0.00 eval
+STOP_ON_DRAW: 0  # stop searching if the last X consecutive iterations all returned 0.00 eval
                  # (useful to save computing time if the position is a dead draw)
                  # set to 0 to disable
 STOP_ON_EVAL: 0    # stop searching if absolute value of the eval is >= X (in centipawns)

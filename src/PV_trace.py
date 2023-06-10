@@ -32,7 +32,11 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
     drawn_moves_count = 0
     
     while i <= MAX_ITER:
-        info: chess.engine.InfoDict = engine.__engine__(board.fen(), depth=depth, nodes=nodes, time=time, mate=mate)
+        if not utils.ROOT_BOARD:
+            info: chess.engine.InfoDict = engine.__engine__(fen=board.fen(), depth=depth, nodes=nodes, time=time, mate=mate)
+        else:
+            info: chess.engine.InfoDict = engine.__engine__(depth=depth, nodes=nodes, time=time, mate=mate)
+        
         pv = info["pv"]
         # only take the first MAX_MOVES of the pv because it can be increasingly unreliable
         pv = pv[:MAX_MOVES]
