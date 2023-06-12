@@ -1,4 +1,11 @@
-## PVplayer
+<div align="center">
+   <h2>PVplayer</h2>
+   A free and powerful chess analysis tool.
+</div>
+<br>
+
+
+## 1) PVtrace tool
 
 A revolutionary new tool for chess analysis that uses a chess engine
 such as [Stockfish](https://github.com/official-stockfish/Stockfish) or [Lc0](https://github.com/LeelaChessZero/lc0)
@@ -35,3 +42,24 @@ python3 PV_trace.py
 There are many terms in `config.yml` that can be modified to suit your needs. 
 This includes the limits for evaluation, number of PV moves to use for each iteration, etc. 
 Modifying these terms may increase/decrease the accuracy and speed of the analysis.
+
+
+## 2) PVengine (WIP)
+
+A one-of-a-kind engine that makes better use of the power of strong engines (e.g. Stockfish).
+
+### How it works
+Heavily inspired by the idea of PVtrace, PVengine searches each move using a chess engine, then
+traces the PV line in every iteration for each move in order to provide an accurate evaluation of each move.
+It then chooses the move with the best PV evaluation.
+
+### Requirements
+The same as PVtrace (see above).
+
+### Sample usage
+```
+cd src
+python3 engine_main.py
+```
+
+PVengine follows the UCI protocol, so you can type UCI commands just like in other engines.
