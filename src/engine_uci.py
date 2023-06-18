@@ -1,6 +1,7 @@
 """
 Special thanks to PyFish for most of the UCI code.
 """
+import time
 
 import chess, chess.engine
 
@@ -42,17 +43,31 @@ def uci():
     """
     Start the UCI interface.
     """
+
+    # Write to log file
+    LOG_FILE = "uci_log.txt"
+    with open(LOG_FILE, "a") as f:
+        f.write(time.time().__str__() + "startup\n")
     
     print("PVplayer chess engine")
     pos = chess.Board()
     while True:
         command = input()
+        # Write to log file
+        LOG_FILE = "uci_log.txt"
+        with open(LOG_FILE, "a") as f:
+            f.write(time.time().__str__() + " " + command + "\n")
+            
         if command == "uci":
             print(f"id name PVplayer")
             print(f"id author the PVplayer developers (see AUTHORS file)\n")
             # UCI options
             print(options_str())
             print("uciok")
+            # Write to log file
+            LOG_FILE = "uci_log.txt"
+            with open(LOG_FILE, "a") as f:
+                f.write(time.time().__str__() + "Given UCI output\n")
         elif command == "isready":
             print("readyok")
         elif command == "ucinewgame":

@@ -1,3 +1,5 @@
+#!python3
+
 import engine_uci
 
 def main():

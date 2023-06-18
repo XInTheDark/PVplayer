@@ -32,8 +32,13 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     rootPv = info["pv"]
     total_nodes += info["nodes"]
     
-    print(f"info depth 0 score cp {rootScore.__uci_str__()} nodes {total_nodes} "
+    print(f"info depth 0 multipv 1 score cp {rootScore.__uci_str__()} nodes {total_nodes} "
           f"pv {utils.pv_to_uci(rootPv)}")
+    # Write to log file
+    LOG_FILE = "uci_log.txt"
+    with open(LOG_FILE, "a") as f:
+        f.write(f"{time_now().__str__()} info depth 0 multipv 1 score cp {rootScore.__uci_str__()} nodes {total_nodes} "
+                f"pv {utils.pv_to_uci(rootPv)}\n")
     rootStm = rootPos.turn
     
     
@@ -121,8 +126,13 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
         # print(f"Iteration {i} | Best move: {bestMove} | Eval: {bestValue} | Depth: {depth}")
         
         # proper UCI formatting
-        print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} "
+        print(f"info depth {i} multipv 1 score cp {bestValue.__uci_str__()} nodes {total_nodes} "
               f"pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
+        # Write to log file
+        LOG_FILE = "uci_log.txt"
+        with open(LOG_FILE, "a") as f:
+            f.write(f"{time_now().__str__()} info depth {i} multipv 1 score cp {bestValue.__uci_str__()} nodes {total_nodes} "
+                    f"pv {utils.pv_to_uci(rootMovesPv[bestMove])}\n")
         
         # Update pruned moves after we finish searching all root moves
         for move in rootMovesEval.keys():
@@ -225,7 +235,7 @@ def calc_nodes(move: chess.Move, bestValue: Value, i: int, default_nodes: int, p
     # if prevEval >= bestValue - 20:
     #     scale = min(1.05, 1 + ((40 - rootMovesSize) / 100))
     # overriden by promising()
-        
+    
     if move in rootMovesExtraNodes.keys():
         scale *= rootMovesExtraNodes[move]
     
