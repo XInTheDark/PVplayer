@@ -112,7 +112,7 @@ class Option:
 options = {
     "MAX_MOVES": Option.Spin("MAX_MOVES", 5, 1, 100),
     "Nodes": Option.Spin("Nodes", 500000, 0, 2**32),
-    "UCI_DebugMode": Option.Check("UCI_DebugMode", True),  # TODO: set to False before first release
+    "UCI_DebugMode": Option.Check("UCI_DebugMode", False),
     
 }
 

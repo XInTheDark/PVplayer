@@ -36,6 +36,9 @@ class Value:
     def __str__(self):
         return utils.cp_to_score(self.value)
     
+    def __uci_str__(self):
+        return str(self.value)
+    
     def __lt__(self, other):
         if type(other) == int:
             return self.value < other

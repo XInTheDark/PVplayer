@@ -6,6 +6,8 @@ from search_h import *
 import query_tb
 from engine_ucioption import *
 
+from time import time as time_now
+
 
 def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, nodes: int = None, time: int = None,
             mate: int = None):
@@ -43,8 +45,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
     bestValue = Value(-99999, rootStm)
     bestMove = None
     
+    total_nodes = 0
+    last_output_time = time_now()
+    
     while i <= MAX_ITERS:
-        currentIterTotalNodes = 0
         
         for move in rootMoves:
             if move in pruned_rootMoves.keys():
@@ -65,8 +69,13 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
                 pos.push(move)
                 rootMovesPos[move] = pos
             
+            # UCI: if there hasn't been an output for 5 seconds, output currmove
+            if time_now() - last_output_time >= 5:
+                print(f"info depth {i} currmove {move} currmovenumber {rootMoves.index(move) + 1} "
+                      f"nodes {total_nodes}")
+                last_output_time = time_now()
+                
             # search
-            
             try:
                 prevEval = rootMovesEval[move]
             except KeyError:
@@ -76,7 +85,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
             
             info: chess.engine.InfoDict = engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=time,
                                                             mate=mate)
-            currentIterTotalNodes += info["nodes"]
+            total_nodes += info["nodes"]
             pv = info["pv"]
             pv = pv[:MAX_MOVES]
             
@@ -107,7 +116,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
         # print(f"Iteration {i} | Best move: {bestMove} | Eval: {bestValue} | Depth: {depth}")
         
         # proper UCI formatting
-        print(f"info depth {i} score {bestValue} nodes {currentIterTotalNodes} "
+        print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} "
               f"pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
         
         # Update pruned moves after we finish searching all root moves
