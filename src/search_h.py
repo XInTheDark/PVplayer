@@ -57,6 +57,32 @@ class Value:
             return self.value >= other
         return self.value >= other.value
     
+    # +, -, *, /, //
+    def __add__(self, other):
+        if type(other) == int:
+            return self.value + other
+        return self.value + other.value
+    def __sub__(self, other):
+        if type(other) == int:
+            return self.value - other
+        return self.value - other.value
+    def __mul__(self, other):
+        if type(other) == int:
+            return self.value * other
+        return self.value * other.value
+    def __truediv__(self, other):
+        if type(other) == int:
+            return self.value / other
+        return self.value / other.value
+    def __floordiv__(self, other):
+        if type(other) == int:
+            return self.value // other
+        return self.value // other.value
+    
     def white(self):
         if self.pov:
             return self.value if self.pov == chess.WHITE else -self.value
+        
+        
+def clamp(value, min_value, max_value):
+    return max(min(value, max_value), min_value)
