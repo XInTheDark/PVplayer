@@ -53,6 +53,8 @@ Heavily inspired by the idea of PVtrace, PVengine searches each move using a che
 traces the PV line in every iteration for each move in order to provide an accurate evaluation of each move.
 It then chooses the move with the best PV evaluation.
 
+PVengine follows the UCI protocol, so you can type UCI commands just like in other engines, or use it in a chess GUI.
+
 ### Requirements
 The same as PVtrace (see above).
 
@@ -62,4 +64,5 @@ cd src
 python3 engine_main.py
 ```
 
-PVengine follows the UCI protocol, so you can type UCI commands just like in other engines.
+### Building
+A shell script for building an executable for the engine is available at `src/engine_build.sh`.
