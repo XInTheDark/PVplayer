@@ -1,9 +1,8 @@
 import chess, chess.engine
 
-import engine
+import engine_engine
 import utils
 from search_h import *
-import query_tb
 from engine_ucioption import *
 
 from time import time as time_now
@@ -20,14 +19,21 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
         nodes = option("Nodes")
     
     i = 1
+    total_nodes = 0
     
     rootMoves = list(rootPos.legal_moves)
     
     # first evaluation for rootPos
-    info: chess.engine.InfoDict = engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=nodes, time=time,
+    info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=nodes, time=time,
                                                     mate=mate)
     
-    rootScore = info["score"].white()  # white, cp
+    rootScore = Value(info["score"])
+    rootBestMove = info["pv"][0]
+    rootPv = info["pv"]
+    total_nodes += info["nodes"]
+    
+    print(f"info depth 0 score cp {rootScore.__uci_str__()} nodes {total_nodes} "
+          f"pv {utils.pv_to_uci(rootPv)}")
     rootStm = rootPos.turn
     
     
@@ -45,7 +51,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
     bestValue = Value(-99999, rootStm)
     bestMove = None
     
-    total_nodes = 0
     last_output_time = time_now()
     
     while i <= MAX_ITERS:
@@ -83,7 +88,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
                 
             move_nodes = calc_nodes(move, bestValue, i, nodes, prevEval, (move==bestMove), rootMovesExtraNodes)
             
-            info: chess.engine.InfoDict = engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=time,
+            info: chess.engine.InfoDict = engine_engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=time,
                                                             mate=mate)
             total_nodes += info["nodes"]
             pv = info["pv"]

@@ -114,6 +114,8 @@ def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int
     
     
 def main():
+    utils.__init__()
+    
     startfen = input("FEN > ")
     if not startfen:
         startfen = chess.STARTING_FEN

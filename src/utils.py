@@ -10,10 +10,16 @@ PGN_TEXT = f"""[Event "PVplayer analysis"]
 """
 MOVE_COUNT = 1
 
-with open("config.yml", "r") as f:
-    config = yaml.safe_load(f)
-    export_pgn = config["EXPORT_PGN"]
-    detailed_pgn = config["DETAILED_PGN"]
+export_pgn = detailed_pgn = False
+
+
+def __init__():
+    global export_pgn, detailed_pgn
+    
+    with open("config.yml", "r") as f:
+        config = yaml.safe_load(f)
+        export_pgn = config["EXPORT_PGN"]
+        detailed_pgn = config["DETAILED_PGN"]
 
 
 def push_pv(start, pv, info=None, is_tb=False):
