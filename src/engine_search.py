@@ -8,7 +8,7 @@ from engine_ucioption import *
 from time import time as time_now
 
 
-def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, nodes: int = None, time: int = None,
+def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, time: int = None,
             mate: int = None):
     """
     Search a position by tracing the PV.
@@ -170,9 +170,15 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=1, depth: int = None, no
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
             bestValue = Value(-99999, rootStm)
-            bestMove = None
             
         i += 1
+        
+    # After search is finished
+    bestPv = rootMovesPv[bestMove]
+    if len(bestPv) == 1:
+        print(f"bestmove {bestMove}")
+    else:
+        print(f"bestmove {bestMove} ponder {bestPv[1]}")
         
         
 def prune_margin(bestValue: Value, i: int):
