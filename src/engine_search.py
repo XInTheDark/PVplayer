@@ -12,19 +12,21 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             mate: int = None):
     """
     Search a position by tracing the PV.
-    """
     
-    # if no parameters are given, default to nodes
-    if not depth and not nodes and not time and not mate:
-        nodes = option("Nodes")
+    param depth: Maximum number of iterations
+    param nodes: Maximum number of *total* nodes across all iterations
+    param time: Maximum time *per move*
+    """
     
     i = 1
     total_nodes = 0
     
+    default_nodes = option("Nodes")
+    
     rootMoves = list(rootPos.legal_moves)
     
     # first evaluation for rootPos
-    info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=nodes, time=time,
+    info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=time,
                                                     mate=mate)
     
     rootScore = Value(info["score"])
@@ -50,12 +52,35 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     
     bestValue = Value(-99999, rootStm)
     bestMove = None
+    prevBestValue = rootScore
+    prevBestMove = rootBestMove
     
     last_output_time = time_now()
     
     while i <= MAX_ITERS:
         
         for move in rootMoves:
+            # Check for max nodes reached
+            if nodes and total_nodes >= nodes:
+                # Use previous iteration best move since this iteration is incomplete
+                bestMove = prevBestMove
+                bestValue = prevBestValue
+                    
+                try:
+                    best_pv = rootMovesPv[bestMove]
+                except KeyError:
+                    best_pv = [bestMove]
+
+                print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} "
+                      f"pv {utils.pv_to_uci(best_pv)}")
+                
+                
+                if len(best_pv) <= 1:
+                    print(f"bestmove {bestMove}")
+                else:
+                    print(f"bestmove {bestMove} ponder {best_pv[1]}")
+                return
+                
             if move in pruned_rootMoves.keys():
                 pruned_iter = pruned_rootMoves[move]
                 if pruned_iter >= 5 or pruned_iter >= i + 5:
@@ -86,7 +111,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             except KeyError:
                 prevEval = None
                 
-            move_nodes = calc_nodes(move, bestValue, i, nodes, prevEval, (move==bestMove), rootMovesExtraNodes)
+            move_nodes = calc_nodes(move, bestValue, i, default_nodes, prevEval, (move==bestMove), rootMovesExtraNodes)
             
             info: chess.engine.InfoDict = engine_engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=time,
                                                             mate=mate)
@@ -169,6 +194,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             # Restart the search
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
+            prevBestValue = bestValue
+            prevBestMove = bestMove
             bestValue = Value(-99999, rootStm)
             
         i += 1
