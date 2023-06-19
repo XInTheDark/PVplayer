@@ -29,6 +29,7 @@ this +1.0 eval is enough to force a win. PVplayer solves this problem by running
 to calculate to a tablebase position where the Win/Loss/Draw is confirmed.
 
 ### Requirements
+- A working Python3 installation
 - `python-chess` library
 - An executable chess engine (e.g. Stockfish). The path to the executable can be modified in [config.yml](src/config.yml).
 
@@ -49,11 +50,9 @@ Modifying these terms may increase/decrease the accuracy and speed of the analys
 A one-of-a-kind engine that makes better use of the power of strong engines (e.g. Stockfish).
 
 ### How it works
-Heavily inspired by the idea of PVtrace, PVengine searches each move using a chess engine, then
+Being an upgraded version of PVtrace, PVengine searches each move using a chess engine, then
 traces the PV line in every iteration for each move in order to provide an accurate evaluation of each move.
 It then chooses the move with the best PV evaluation.
-
-PVengine follows the UCI protocol, so you can type UCI commands just like in other engines, or use it in a chess GUI.
 
 ### Requirements
 The same as PVtrace (see above).
@@ -65,4 +64,9 @@ python3 engine_main.py
 ```
 
 ### Building
-A shell script for building an executable for the engine is available at `src/engine_build.sh`.
+A shell script for building an executable for the engine (on Linux-based systems) is available at `src/engine_build.sh`.
+It can be slightly modified for building on Windows as well.
+
+### Configuration
+PVengine follows the UCI protocol, so you can type UCI commands just like in other engines, or use it in a chess GUI.
+Options are set using the UCI interface as well, so modifying `config.yml` will not work for PVengine.
