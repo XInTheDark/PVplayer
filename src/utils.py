@@ -101,7 +101,8 @@ def write_pgn():
         os.mkdir("pgns")
     
     # Write the PGN
-    with open(f"pgns/{datetime.datetime.now().strftime('%Y.%m.%d %H.%M.%S')}.pgn", "w") as f:
+    FILE_NAME = f"pgns/{datetime.datetime.now().strftime('%Y.%m.%d %H.%M.%S')}.pgn"
+    with open(FILE_NAME, "w") as f:
         f.write(PGN_TEXT)
     
     # Reset PGN_TEXT
@@ -110,7 +111,7 @@ def write_pgn():
     [Date "{datetime.datetime.now().strftime('%Y.%m.%d')}"]
     """
     
-    print("PGN written to /pgns!")
+    print(f"PGN written to {FILE_NAME}")
 
 
 def cp_to_score(cp):

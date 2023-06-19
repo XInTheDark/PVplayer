@@ -3,7 +3,7 @@ import yaml
 
 import engine
 import utils
-import printBoard
+import print_board as printBoard
 import query_tb
 
 def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int=None, time:int=None, mate:int=None,
