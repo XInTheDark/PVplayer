@@ -55,7 +55,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     prevBestValue = rootScore
     prevBestMove = rootBestMove
     
-    last_output_time = time_now()
+    root_time = last_output_time = time_now()
     
     while i <= MAX_ITERS:
         
@@ -71,8 +71,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 except KeyError:
                     best_pv = [bestMove]
 
-                print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} "
-                      f"pv {utils.pv_to_uci(best_pv)}")
+                time_taken = time_now() - root_time
+                print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
+                      f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(best_pv)}")
                 
                 
                 if len(best_pv) <= 1:
@@ -146,8 +147,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
         # print(f"Iteration {i} | Best move: {bestMove} | Eval: {bestValue} | Depth: {depth}")
         
         # proper UCI formatting
-        print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} "
-              f"pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
+        time_taken = time_now() - root_time
+        print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
+              f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
         
         # Update pruned moves after we finish searching all root moves
         for move in rootMovesEval.keys():

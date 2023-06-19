@@ -14,9 +14,9 @@ class Value:
     def __init__(self, value, pov=None):
         if type(value) == int:
             self.value = value
-        elif type(value) == chess.engine.PovScore and not pov:
+        elif type(value) == chess.engine.PovScore and pov is None:
             self.value = value.relative.score()
-        elif type(value) == chess.engine.PovScore and pov:
+        elif type(value) == chess.engine.PovScore and pov is not None:
             self.value = value.white().score()
             if pov == chess.BLACK:
                 self.value = -self.value
@@ -42,22 +42,32 @@ class Value:
     def __lt__(self, other):
         if type(other) == int:
             return self.value < other
+        if other.pov is not None and other.pov != self.pov:
+            return self.value < -other.value
         return self.value < other.value
     def __gt__(self, other):
         if type(other) == int:
             return self.value > other
+        if other.pov is not None and other.pov != self.pov:
+            return self.value > -other.value
         return self.value > other.value
     def __eq__(self, other):
         if type(other) == int:
             return self.value == other
+        if other.pov is not None and other.pov != self.pov:
+            return self.value == -other.value
         return self.value == other.value
     def __le__(self, other):
         if type(other) == int:
             return self.value <= other
+        if other.pov is not None and other.pov != self.pov:
+            return self.value <= -other.value
         return self.value <= other.value
     def __ge__(self, other):
         if type(other) == int:
             return self.value >= other
+        if other.pov is not None and other.pov != self.pov:
+            return self.value >= -other.value
         return self.value >= other.value
     
     # +, -, *, /, //
