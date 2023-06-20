@@ -1,8 +1,11 @@
 <div align="center">
-  <h2>PVplayer</h2>
-  A free and powerful chess analysis tool.
+   <h2>PVplayer</h2>
+   A free and powerful chess analysis tool.
 </div>
 <br>
+
+
+## 1) PVtrace tool
 
 A revolutionary new tool for chess analysis that uses a chess engine
 such as [Stockfish](https://github.com/official-stockfish/Stockfish) or [Lc0](https://github.com/LeelaChessZero/lc0)
@@ -26,6 +29,7 @@ this +1.0 eval is enough to force a win. PVplayer solves this problem by running
 to calculate to a tablebase position where the Win/Loss/Draw is confirmed.
 
 ### Requirements
+- A working Python3 installation
 - `python-chess` library
 - An executable chess engine (e.g. Stockfish). The path to the executable can be modified in [config.yml](src/config.yml).
 
@@ -39,3 +43,30 @@ python3 PV_trace.py
 There are many terms in `config.yml` that can be modified to suit your needs. 
 This includes the limits for evaluation, number of PV moves to use for each iteration, etc. 
 Modifying these terms may increase/decrease the accuracy and speed of the analysis.
+
+
+## 2) PVengine (WIP)
+
+A one-of-a-kind engine that makes better use of the power of strong engines (e.g. Stockfish).
+
+### How it works
+Being an upgraded version of PVtrace, PVengine searches each move using a chess engine, then
+traces the PV line in every iteration for each move in order to provide an accurate evaluation of each move.
+It then chooses the move with the best PV evaluation.
+
+### Requirements
+The same as PVtrace (see above).
+
+### Sample usage
+```
+cd src
+python3 engine_main.py
+```
+
+### Building
+A shell script for building an executable for the engine (on Linux-based systems) is available at `src/engine_build.sh`.
+It can be slightly modified for building on Windows as well.
+
+### Configuration
+PVengine follows the UCI protocol, so you can type UCI commands just like in other engines, or use it in a chess GUI.
+Options are set using the UCI interface as well, so modifying `config.yml` will not work for PVengine.
