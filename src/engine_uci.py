@@ -7,6 +7,8 @@ import chess, chess.engine
 import engine_search
 from engine_ucioption import *
 
+import threading, sys
+
 
 # constants
 MAX_DEPTH = 100
@@ -38,86 +40,118 @@ def fen_from_str(s: str):
     return [fen, rest]
 
 
+def handle_commands():
+    pos = chess.Board()
+    search_thread = None
+    
+    try:
+        while True:
+            command = sys.stdin.readline().strip()
+            if command == "uci":
+                print(f"id name PVplayer")
+                print(f"id author the PVplayer developers (see AUTHORS file)\n")
+                # UCI options
+                print(options_str())
+                print("uciok")
+            elif command == "isready":
+                print("readyok")
+            elif command == "ucinewgame":
+                pos = chess.Board()
+            elif command == "position startpos":
+                pos = chess.Board()
+            elif command.startswith("position startpos moves"):
+                try:
+                    moves = command.split("position startpos moves ")[1].split(" ")
+                except IndexError:
+                    moves = []
+                for move in moves:
+                    pos.push(uci_to_move(move))
+            elif command.startswith("position fen") and "moves" in command:
+                # remove 'position fen '
+                s = ' '.join(command.split(" ")[2:])
+                fen = fen_from_str(s)[0]
+                moves = fen_from_str(s)[1].split()[1:]
+                pos = chess.Board(fen)
+                for move in moves:
+                    pos.push(uci_to_move(move))
+            elif command.startswith("position fen"):
+                s = ' '.join(command.split(" ")[2:])
+                fen = fen_from_str(s)[0]
+                pos = chess.Board(fen)
+            elif command.startswith("go"):
+                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "movetime":
+                    movetime = int(command.split(" ")[2])
+                else:
+                    movetime = None
+                
+                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "nodes":
+                    nodes = int(command.split(" ")[2])
+                else:
+                    nodes = None
+                
+                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "depth":
+                    MAX_ITERS = int(command.split(" ")[2])
+                else:
+                    MAX_ITERS = MAX_DEPTH
+                
+                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "infinite":
+                    MAX_ITERS = MAX_DEPTH
+                
+                # we do not support time controls yet.
+                # we also do not support pondering.
+                
+                # start search
+                search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS, movetime, nodes))
+                search_thread.start()
+                
+            # quit and stop
+            elif command == "quit":
+                exit()
+            elif command == "stop":
+                if search_thread:
+                    engine_search.stop_search()
+                    search_thread.join()
+                    search_thread = None
+            
+            # option setting
+            elif command.startswith("setoption"):
+                # FORMAT: name <id> value <x>
+                c = command.split()
+                if not c[1] == "name":
+                    continue
+                try:
+                    value_index = c.index("value")
+                except ValueError:
+                    # Type = button
+                    value_index = c.__len__()
+                name = " ".join(c[2:value_index])
+                value = " ".join(c[value_index + 1:])
+                
+                # set the option
+                setoption(name, value)
+    except KeyboardInterrupt:
+        exit()
+            
+
+def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes):
+    engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, time=time, nodes=nodes)
+    
+    
 def uci():
     """
     Start the UCI interface.
     """
-    
     print("PVplayer chess engine")
-    pos = chess.Board()
-    while True:
-        command = input()
-        if command == "uci":
-            print(f"id name PVplayer")
-            print(f"id author the PVplayer developers (see AUTHORS file)\n")
-            # UCI options
-            print(options_str())
-            print("uciok")
-        elif command == "isready":
-            print("readyok")
-        elif command == "ucinewgame":
-            pos = chess.Board()
-        elif command == "position startpos":
-            pos = chess.Board()
-        elif command.startswith("position startpos moves"):
-            try:
-                moves = command.split("position startpos moves ")[1].split(" ")
-            except IndexError:
-                moves = []
-            for move in moves:
-                pos.push(uci_to_move(move))
-        elif command.startswith("position fen") and "moves" in command:
-            # remove 'position fen '
-            s = ' '.join(command.split(" ")[2:])
-            fen = fen_from_str(s)[0]
-            moves = fen_from_str(s)[1].split()[1:]
-            pos = chess.Board(fen)
-            for move in moves:
-                pos.push(uci_to_move(move))
-        elif command.startswith("position fen"):
-            s = ' '.join(command.split(" ")[2:])
-            fen = fen_from_str(s)[0]
-            pos = chess.Board(fen)
-        elif command.startswith("go"):
-            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "movetime":
-                movetime = int(command.split(" ")[2])
-            else:
-                movetime = None
-            
-            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "nodes":
-                nodes = int(command.split(" ")[2])
-            else:
-                nodes = None
-            
-            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "depth":
-                MAX_ITERS = int(command.split(" ")[2])
-            else:
-                MAX_ITERS = MAX_DEPTH
-            
-            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "infinite":
-                MAX_ITERS = MAX_DEPTH
-            
-            # we do not support time controls yet.
-            # we also do not support pondering.
-            
-            # start searching
-            engine_search.search(pos, MAX_MOVES=option("MAX_MOVES"), MAX_ITERS=MAX_ITERS, time=movetime, nodes=nodes)
-            
-        # TODO: quit and stop
-
-        # option setting
-        elif command.startswith("setoption"):
-            # FORMAT: name <id> value <x>
-            c = command.split()
-            if not c[1] == "name":
-                continue
-            try:
-                value_index = c.index("value")
-            except ValueError:
-                # Type = button
-                value_index = c.__len__()
-            name = " ".join(c[2:value_index])
-            value = " ".join(c[value_index + 1:])
     
-            # set the option
-            setoption(name, value)
+    # Create a thread for handling UCI input
+    uci_thread = threading.Thread(target=handle_commands)
+    uci_thread.start()
+    
+    while True:
+        uci_thread.join(timeout=0.1)
+        
+        if not uci_thread.is_alive():
+            # Reset the UCI thread for the next iteration
+            uci_thread = threading.Thread(target=handle_commands)
+            uci_thread.start()
+        
