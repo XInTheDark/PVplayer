@@ -4,13 +4,15 @@ import engine_engine
 import utils
 from engine_search_h import *
 from engine_ucioption import *
+from engine_timeman import *
 
 from time import time as time_now
+import threading
 
 STOP_SEARCH = False
 
 def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, time: int = None,
-            mate: int = None):
+            mate: int = None, timeman: Time = Time()):
     """
     Search a position by tracing the PV.
     
@@ -20,6 +22,16 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     """
     
     global STOP_SEARCH
+
+    # initialise timeman object
+    timeman.init(rootPos.turn, rootPos.ply())
+    optTime = timeman.optTime
+    
+    # Set timer
+    if optTime:
+        threading.Timer(optTime / 1000, stop_search).start()
+        if option("UCI_DebugMode"):
+            print(f"info string Optimal time: {optTime}ms")
     
     i = 1
     total_nodes = 0

@@ -117,6 +117,8 @@ options = {
     
     "Threads": Option.Spin("Threads", 1, 1, 1024),
     "Hash": Option.Spin("Hash", 16, 1, 33554432),
+    
+    "Move Overhead": Option.Spin("Move Overhead", 10, 0, 5000),
 }
 
 
