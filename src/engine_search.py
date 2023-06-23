@@ -7,6 +7,7 @@ from engine_ucioption import *
 
 from time import time as time_now
 
+STOP_SEARCH = False
 
 def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, time: int = None,
             mate: int = None):
@@ -17,6 +18,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     param nodes: Maximum number of *total* nodes across all iterations
     param time: Maximum time *per move*
     """
+    
+    global STOP_SEARCH
     
     i = 1
     total_nodes = 0
@@ -60,8 +63,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     while i <= MAX_ITERS:
         
         for move in rootMoves:
-            # Check for max nodes reached
-            if nodes and total_nodes >= nodes:
+            # Check for stopped search
+            if STOP_SEARCH or (nodes and total_nodes >= nodes):
+                STOP_SEARCH = False  # reset
+                
                 # Use previous iteration best move since this iteration is incomplete
                 bestMove = prevBestMove
                 bestValue = prevBestValue
@@ -286,3 +291,7 @@ def promising(move: chess.Move, rootMovesEval: dict, rootMovesSize: int, i: int,
     
     return final_score
     
+    
+def stop_search():
+    global STOP_SEARCH
+    STOP_SEARCH = True
