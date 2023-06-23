@@ -170,3 +170,6 @@ def is_drawn_score(score):
 def nodes_to_str(nodes: int):
     """@:return: a string of the number of nodes in millions"""
     return f"{nodes / 1000000:.2f}M"
+
+def clamp(value, min_value, max_value):
+    return max(min(value, max_value), min_value)

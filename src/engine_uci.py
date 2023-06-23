@@ -6,6 +6,7 @@ import chess, chess.engine
 
 import engine_search
 from engine_ucioption import *
+from engine_timeman import Time
 
 import threading, sys
 
@@ -47,6 +48,8 @@ def handle_commands():
     try:
         while True:
             command = sys.stdin.readline().strip()
+            tm = Time()  # initialize new timeman object
+            
             if command == "uci":
                 print(f"id name PVplayer")
                 print(f"id author the PVplayer developers (see AUTHORS file)\n")
@@ -79,29 +82,38 @@ def handle_commands():
                 fen = fen_from_str(s)[0]
                 pos = chess.Board(fen)
             elif command.startswith("go"):
-                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "movetime":
+                has_arg = command.split(" ").__len__() > 1
+                args = command.split(" ")
+                keyword = command.split(" ")[1]
+                
+                if has_arg and keyword == "movetime":
                     movetime = int(command.split(" ")[2])
                 else:
                     movetime = None
                 
-                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "nodes":
+                if has_arg and keyword == "nodes":
                     nodes = int(command.split(" ")[2])
                 else:
                     nodes = None
                 
-                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "depth":
+                if has_arg and keyword == "depth":
                     MAX_ITERS = int(command.split(" ")[2])
                 else:
                     MAX_ITERS = MAX_DEPTH
                 
-                if command.split(" ").__len__() > 1 and command.split(" ")[1] == "infinite":
+                if has_arg and keyword == "infinite":
                     MAX_ITERS = MAX_DEPTH
                 
+                if has_arg and ("wtime" in args or "btime" in args):
+                    wtime, btime, winc, binc = process_time(args)
+                    tm.__init__(wtime, btime, winc, binc)
+                    
                 # we do not support time controls yet.
                 # we also do not support pondering.
                 
                 # start search
-                search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS, movetime, nodes))
+                search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS, 
+                                                                            movetime, nodes, tm))
                 search_thread.start()
                 
             # quit and stop
@@ -133,8 +145,8 @@ def handle_commands():
         exit()
             
 
-def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes):
-    engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, time=time, nodes=nodes)
+def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
+    engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, time=time, nodes=nodes, timeman=tm)
     
     
 def uci():
@@ -155,3 +167,28 @@ def uci():
             uci_thread = threading.Thread(target=handle_commands)
             uci_thread.start()
         
+        
+# Helper functions
+def process_time(args: list):
+    wtime = btime = winc = binc = 0
+    try:
+        wtime = int(args[args.index("wtime") + 1])
+    except ValueError:
+        pass
+    
+    try:
+        btime = int(args[args.index("btime") + 1])
+    except ValueError:
+        pass
+    
+    try:
+        winc = int(args[args.index("winc") + 1])
+    except ValueError:
+        pass
+    
+    try:
+        binc = int(args[args.index("binc") + 1])
+    except ValueError:
+        pass
+    
+    return wtime, btime, winc, binc
