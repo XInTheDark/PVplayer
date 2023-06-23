@@ -3,12 +3,6 @@ import yaml
 import utils
 from engine_ucioption import *
 
-ENGINE_PATH = option("ENGINE_PATH")
-engine_options = {
-    "Threads": option("Threads"),
-    "Hash": option("Hash"),
-}
-
 def __engine__(fen: str = None, depth: int = None, nodes: int = None, time: int = None, mate: int = None):
     """
     fen: FEN string
@@ -16,6 +10,14 @@ def __engine__(fen: str = None, depth: int = None, nodes: int = None, time: int 
     nodes: number of nodes to search
     time: time to search for
     """
+    
+    # UCI options
+    ENGINE_PATH = option("ENGINE_PATH")
+    engine_options = {
+        "Threads": option("Threads"),
+        "Hash": option("Hash"),
+    }
+    
     # 1. Create a new engine
     engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
     
@@ -30,12 +32,7 @@ def __engine__(fen: str = None, depth: int = None, nodes: int = None, time: int 
     limit = chess.engine.Limit(depth=depth, nodes=nodes, time=time, mate=mate)
     
     # 4. Evaluate with engine
-    # We prefer to pass the entire moves list to the engine, so that it is not
-    # blind to threefold repetition.
-    if fen:
-        result = engine.analyse(board, limit)
-    else:  # we use ROOT_BOARD in order to preserve move stack
-        result = engine.analyse(utils.ROOT_BOARD, limit)
+    result = engine.analyse(board, limit)
     
     # 5. Close the engine
     engine.quit()
