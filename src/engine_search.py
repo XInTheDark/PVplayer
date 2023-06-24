@@ -11,6 +11,8 @@ import threading
 
 STOP_SEARCH = False
 
+lastNps = 1000000
+
 def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, time: int = None,
             mate: int = None, timeman: Time = Time()):
     """
@@ -21,7 +23,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     param time: Maximum time *per move*
     """
     
-    global STOP_SEARCH
+    global STOP_SEARCH, lastNps
 
     # initialise timeman object
     timeman.init(rootPos.turn, rootPos.ply())
@@ -39,8 +41,17 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     default_nodes = option("Nodes")
     
     rootMoves = list(rootPos.legal_moves)
+    rootMovesSize = len(list(rootMoves))
     
-    # first evaluation for rootPos
+    # If we likely don't have enough time to search all moves, only use root engine eval
+    if optTime:
+        if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
+            info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime / 1000)
+            score = Value(info['score'])
+            print(f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
+                  f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(info['pv'])}")
+            return
+            
     info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=time,
                                                     mate=mate)
     
@@ -49,7 +60,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     rootPv = info["pv"]
     total_nodes += info["nodes"]
     
-    print(f"info depth 0 score cp {rootScore.__uci_str__()} nodes {total_nodes} "
+    print(f"info depth 0 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {info['nps']} "
           f"pv {utils.pv_to_uci(rootPv)}")
     rootStm = rootPos.turn
     
@@ -62,8 +73,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     rootMovesPv = {}
     pruned_rootMoves = {}
     rootMovesExtraNodes = {}
-    
-    rootMovesSize = len(list(rootMoves))
     
     bestValue = Value(-99999, rootStm)
     bestMove = None
@@ -134,6 +143,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             info: chess.engine.InfoDict = engine_engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=time,
                                                             mate=mate)
             total_nodes += info["nodes"]
+            lastNps = info["nps"]
             pv = info["pv"]
             pv = pv[:MAX_MOVES]
             
@@ -165,7 +175,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
         
         # proper UCI formatting
         time_taken = time_now() - root_time
-        print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
+        print(f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
               f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
         
         # Update pruned moves after we finish searching all root moves
@@ -261,11 +271,21 @@ def calc_nodes(move: chess.Move, bestValue: Value, i: int, default_nodes: int, p
     """
     
     bestValue = int(bestValue)
+    prevEval = int(prevEval) if prevEval is not None else None
     scale = 1.0
     
     # If best move, search 30% more nodes
     if is_best or (prevEval and prevEval >= bestValue):
-        scale = 1.3
+        scale *= 1.3
+        
+    # Use more nodes for the first few iterations (also important for accuracy in pruning)
+    if i <= 3:
+        if not prevEval:
+            scale *= 1.5
+        else:
+            scoreDiff = max(bestValue - prevEval, 0)
+            scale *= clamp(1.5 - (scoreDiff / 250), 1.05, 1.4)
+        
     
     # # if prevEval is close to bestValue then search some more nodes depending on rootMovesSize
     # if prevEval >= bestValue - 20:
