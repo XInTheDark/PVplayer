@@ -19,7 +19,7 @@ class Time:
     
     optTime = maxTime = 0
     
-    def __init__(self, wtime: int=None, winc: int=None, btime: int=None, binc: int=None):
+    def __init__(self, wtime: int=0, winc: int=0, btime: int=0, binc: int=0):
         self.wtime = wtime
         self.winc = winc
         self.btime = btime

@@ -84,7 +84,7 @@ def handle_commands():
             elif command.startswith("go"):
                 has_arg = command.split(" ").__len__() > 1
                 args = command.split(" ")
-                keyword = command.split(" ")[1]
+                keyword = command.split(" ")[1] if has_arg else None
                 
                 if has_arg and keyword == "movetime":
                     movetime = int(command.split(" ")[2])
