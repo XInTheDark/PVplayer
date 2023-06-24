@@ -9,7 +9,7 @@ from engine_timeman import *
 from time import time as time_now
 import threading
 
-STOP_SEARCH = False
+STOP_SEARCH = OPTTIME = MAXTIME = False
 
 lastNps = 1000000
 
@@ -24,16 +24,20 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     """
     
     global STOP_SEARCH, lastNps
+    global OPTTIME, MAXTIME
 
     # initialise timeman object
     timeman.init(rootPos.turn, rootPos.ply())
     optTime = timeman.optTime
+    maxTime = timeman.maxTime
     
     # Set timer
     if optTime:
-        threading.Timer(optTime / 1000, stop_search).start()
+        threading.Timer(optTime / 1000, stop_search, args=(True, False)).start()
         if option("UCI_DebugMode"):
-            print(f"info string Optimal time: {optTime}ms")
+            print(f"info string Timeman: Optimal time {optTime}ms")
+    if maxTime:
+        threading.Timer(optTime / 1000, stop_search, args=(True, True)).start()
     
     i = 1
     total_nodes = 0
@@ -90,11 +94,42 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     root_time = last_output_time = time_now()
     
     while i <= MAX_ITERS:
+        # Pre-iteration check:
+        # If we estimate that this iteration will take too long,
+        # Then we should stop searching in order to save time in timed games.
+        if optTime:
+            # Estimate total nodes based on rootMovesSize
+            if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
+                if not bestMove:
+                    bestMove = rootBestMove
+                try:
+                    ponderMove = rootMovesPv[bestMove][1]
+                except KeyError:
+                    ponderMove = None
+                if ponderMove:
+                    print(f"bestmove {bestMove} ponder {ponderMove}")
+                else:
+                    print(f"bestmove {bestMove}")
+                    
+                if option("UCI_DebugMode"):
+                    print(f"info string Timeman: Early abort")
+                return
         
         for move in rootMoves:
             # Check for stopped search
             if STOP_SEARCH or (nodes and total_nodes >= nodes):
-                STOP_SEARCH = False  # reset
+                # Timeman: if optTime has been reached but we are almost done
+                # (i.e. we can finish this iteration within maxTime)
+                # then we continue searching until we finish this iteration.
+                # However, estimate a bit more conservatively to avoid wasting time.
+                if OPTTIME and not MAXTIME:
+                    move_i = rootMoves.index(move)+1
+                    if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * lastNps:
+                        if option("UCI_DebugMode"):
+                            print(f"info string Timeman: Extra time")
+                        continue
+                
+                STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
                 
                 # Use previous iteration best move since this iteration is incomplete
                 bestMove = prevBestMove
@@ -332,6 +367,11 @@ def promising(move: chess.Move, rootMovesEval: dict, rootMovesSize: int, i: int,
     return final_score
     
     
-def stop_search():
-    global STOP_SEARCH
+def stop_search(optTime=False, maxTime=False):
+    global STOP_SEARCH, OPTTIME, MAXTIME
     STOP_SEARCH = True
+    
+    if optTime:
+        OPTTIME = True
+    if maxTime:
+        MAXTIME = True
