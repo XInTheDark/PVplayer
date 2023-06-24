@@ -99,7 +99,7 @@ def handle_commands():
                 if has_arg and keyword == "depth":
                     MAX_ITERS = int(command.split(" ")[2])
                 else:
-                    MAX_ITERS = MAX_DEPTH
+                    MAX_ITERS = 10
                 
                 if has_arg and keyword == "infinite":
                     MAX_ITERS = MAX_DEPTH
