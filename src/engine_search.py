@@ -47,10 +47,18 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     if optTime:
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
             info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime / 1000)
-            score = Value(info['score'])
+            score = Value(info["score"])
+            bestPv = info["pv"]
+            bestMove = bestPv[0]
+            
             print(f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
-                  f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(info['pv'])}")
+                  f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(bestPv)}")
+            if len(bestPv) <= 1:
+                print(f"bestmove {bestMove}")
+            else:
+                print(f"bestmove {bestMove} ponder {bestPv[1]}")
             return
+            
             
     info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=time,
                                                     mate=mate)
@@ -93,19 +101,19 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 bestValue = prevBestValue
                     
                 try:
-                    best_pv = rootMovesPv[bestMove]
+                    bestPv = rootMovesPv[bestMove]
                 except KeyError:
-                    best_pv = [bestMove]
+                    bestPv = [bestMove]
 
                 time_taken = time_now() - root_time
                 print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
-                      f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(best_pv)}")
+                      f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(bestPv)}")
                 
                 
-                if len(best_pv) <= 1:
+                if len(bestPv) <= 1:
                     print(f"bestmove {bestMove}")
                 else:
-                    print(f"bestmove {bestMove} ponder {best_pv[1]}")
+                    print(f"bestmove {bestMove} ponder {bestPv[1]}")
                 return
                 
             if move in pruned_rootMoves.keys():
