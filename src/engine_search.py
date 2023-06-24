@@ -34,7 +34,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     # Set timer
     if optTime:
         threading.Timer(optTime / 1000, stop_search, args=(True, False)).start()
-        if option("UCI_DebugMode"):
+        if option("debug"):
             print(f"info string Timeman: Optimal time {optTime}ms")
     if maxTime:
         threading.Timer(optTime / 1000, stop_search, args=(True, True)).start()
@@ -111,7 +111,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 else:
                     print(f"bestmove {bestMove}")
                     
-                if option("UCI_DebugMode"):
+                if option("debug"):
                     print(f"info string Timeman: Early abort")
                 return
         
@@ -125,7 +125,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 if OPTTIME and not MAXTIME:
                     move_i = rootMoves.index(move)+1
                     if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * lastNps:
-                        if option("UCI_DebugMode"):
+                        if option("debug"):
                             print(f"info string Timeman: Extra time")
                         continue
                 
@@ -153,11 +153,11 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 
             if move in pruned_rootMoves.keys():
                 pruned_iter = pruned_rootMoves[move]
-                if pruned_iter >= 5 or pruned_iter >= i + 5:
+                if pruned_iter > 2 or pruned_iter >= i - 5:
                     # if it is pruned late, then we can assume that it is a bad move
                     continue
                 else:
-                    if pruned_iter - i >= 2:
+                    if i - pruned_iter >= 2:
                         pruned_rootMoves.pop(move)
             
             # find position in rootMovesPos: almost like a transposition table, but not quite.
@@ -205,7 +205,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             # update rootMovesEval
             rootMovesEval[move] = value
             
-            if option("UCI_DebugMode"):
+            if option("debug"):
                 print(f"info string Iteration {i} | Move: {move} | Eval: {value}")
             
             rootMovesPos[move] = pos = utils.push_pv(pos, pv, info)
@@ -227,7 +227,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             min_prune_eval = prune_margin(bestValue, i)
             if v < min_prune_eval:
                 pruned_rootMoves[move] = i
-                if option("UCI_DebugMode"):
+                if option("debug"):
                     print(f"info string Iteration {i} | Pruned: {move} | Prune margin: {min_prune_eval}")
                 
         # Update moves list size
