@@ -15,16 +15,16 @@ class Value:
         if type(value) == int:
             self.value = value
         elif type(value) == chess.engine.PovScore and pov is None:
-            self.value = value.relative.score()
+            self.value = value.relative.score(mate_score=100000)
         elif type(value) == chess.engine.PovScore and pov is not None:
-            self.value = value.white().score()
+            self.value = value.white().score(mate_score=100000)
             if pov == chess.BLACK:
                 self.value = -self.value
             self.pov = pov
         elif type(value) == chess.engine.Score:
-            self.value = value.score()
+            self.value = value.score(mate_score=100000)
         elif type(value) == chess.engine.Cp:
-            self.value = value.score()
+            self.value = value.score(mate_score=100000)
         self.pov = pov
         
     def __int__(self):
