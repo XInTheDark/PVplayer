@@ -86,7 +86,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     pruned_rootMoves = {}
     rootMovesExtraNodes = {}
     
-    bestValue = Value(-99999, rootStm)
+    bestValue = Value(-VALUE_INFINITE, rootStm)
     bestMove = None
     prevBestValue = rootScore
     prevBestMove = rootBestMove
@@ -268,7 +268,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             pruned_rootMoves = {}
             prevBestValue = bestValue
             prevBestMove = bestMove
-            bestValue = Value(-99999, rootStm)
+            bestValue = Value(-VALUE_INFINITE, rootStm)
             
         i += 1
         
