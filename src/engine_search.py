@@ -14,8 +14,8 @@ STOP_SEARCH = OPTTIME = MAXTIME = False
 
 lastNps = 1000000 * option("Threads")
 
-def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, time: int = None,
-            mate: int = None, timeman: Time = Time()):
+def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, movetime: int = None,
+           mate: int = None, timeman: Time = Time()):
     """
     Search a position by tracing the PV.
     
@@ -31,6 +31,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     timeman.init(rootPos.turn, rootPos.ply())
     optTime = timeman.optTime
     maxTime = timeman.maxTime
+    if movetime:
+        optTime = maxTime = movetime
 
     startTime = time_now()
     optTime_timer = maxTime_timer = None
@@ -70,8 +72,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             return
             
             
-    info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=time,
-                                                    mate=mate)
+    info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=None,
+                                                           mate=mate)
     
     rootScore = Value(info["score"])
     rootBestMove = info["pv"][0]
@@ -125,7 +127,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
         # Time management
         # Use more time if bestMove is unstable
         if optTime:
-            optTime *= (1 + 1.5 * math.log10(bestMoveChanges))
+            optTime *= 1 + 1.5 * math.log10(max(1, bestMoveChanges))
             # reset timer
             optTime_timer.cancel()
             optTime_timer = threading.Timer(optTime / 1000, stop_search, args=(True, False))
@@ -200,8 +202,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 
             move_nodes = calc_nodes(move, bestValue, i, default_nodes, prevEval, (move==bestMove), rootMovesExtraNodes)
             
-            info: chess.engine.InfoDict = engine_engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=time,
-                                                            mate=mate)
+            info: chess.engine.InfoDict = engine_engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=None,
+                                                                   mate=mate)
             total_nodes += info["nodes"]
             lastNps = info["nps"]
             pv = info["pv"]

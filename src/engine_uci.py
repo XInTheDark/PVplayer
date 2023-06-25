@@ -86,6 +86,11 @@ def handle_commands():
                 fen = fen_from_str(s)[0]
                 pos = chess.Board(fen)
             elif command.startswith("go"):
+                MAX_ITERS = MAX_DEPTH
+                
+                if command.strip() == "go":
+                    MAX_ITERS = 10
+                    
                 has_arg = command.split(" ").__len__() > 1
                 args = command.split(" ")
                 keyword = command.split(" ")[1] if has_arg else None
@@ -102,8 +107,6 @@ def handle_commands():
                 
                 if has_arg and keyword == "depth":
                     MAX_ITERS = int(command.split(" ")[2])
-                else:
-                    MAX_ITERS = MAX_DEPTH
                 
                 if has_arg and keyword == "infinite":
                     MAX_ITERS = MAX_DEPTH
@@ -150,7 +153,7 @@ def handle_commands():
             
 
 def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
-    engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, time=time, nodes=nodes, timeman=tm)
+    engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
     
     
 def uci():
