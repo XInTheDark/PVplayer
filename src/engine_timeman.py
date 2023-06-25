@@ -1,5 +1,6 @@
 import chess
 import utils
+import math
 
 from engine_ucioption import *
 
@@ -19,7 +20,7 @@ class Time:
     
     optTime = maxTime = 0
     
-    def __init__(self, wtime: int=0, winc: int=0, btime: int=0, binc: int=0):
+    def __init__(self, wtime: int=0, btime: int=0, winc: int=0, binc: int=0):
         self.wtime = wtime
         self.winc = winc
         self.btime = btime
@@ -44,7 +45,9 @@ class Time:
         timeLeft = max(1, self.time[us] + self.inc[us] * 49 - overhead)
         
         # Use extra time with larger increments
-        optExtra = utils.clamp(1.0 + 12.0 * self.inc[us] / self.time[us], 1.0, 1.2)
+        # Also use less time with zero increment
+        optExtra = utils.clamp(1.0 + 0.4 * math.log10(600 * self.inc[us] / self.time[us]), 1.0, 1.25) \
+            if self.inc[us] > 0 else 0.8
         
         # Use more time at start of game
         startExtra = 1 + (16 - ply) * 0.15 if ply < 16 else 1.0
@@ -56,3 +59,4 @@ class Time:
         # Never use more than 80% of the available time for this move
         self.optTime = max(1, int(optScale * timeLeft))
         self.maxTime = int(min(0.8 * self.time[us] - overhead, maxScale * self.optTime))
+        self.optTime = min(self.optTime, self.maxTime)  # optTime <= maxTime

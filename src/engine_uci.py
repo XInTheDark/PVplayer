@@ -47,7 +47,11 @@ def handle_commands():
     
     try:
         while True:
-            command = sys.stdin.readline().strip()
+            try:
+                command = sys.stdin.readline().strip()
+            except Exception:
+                break
+                
             tm = Time()  # initialize new timeman object
             
             if command == "uci":

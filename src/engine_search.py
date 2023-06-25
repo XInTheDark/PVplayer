@@ -8,10 +8,11 @@ from engine_timeman import *
 
 from time import time as time_now
 import threading
+import math
 
 STOP_SEARCH = OPTTIME = MAXTIME = False
 
-lastNps = 1000000
+lastNps = 1000000 * option("Threads")
 
 def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, time: int = None,
             mate: int = None, timeman: Time = Time()):
@@ -30,14 +31,19 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     timeman.init(rootPos.turn, rootPos.ply())
     optTime = timeman.optTime
     maxTime = timeman.maxTime
+
+    startTime = time_now()
+    optTime_timer = maxTime_timer = None
     
     # Set timer
     if optTime:
-        threading.Timer(optTime / 1000, stop_search, args=(True, False)).start()
+        optTime_timer = threading.Timer(optTime / 1000, stop_search, args=(True, False))
+        optTime_timer.start()
         if option("debug"):
             print(f"info string Timeman: Optimal time {optTime}ms")
     if maxTime:
-        threading.Timer(optTime / 1000, stop_search, args=(True, True)).start()
+        maxTime_timer = threading.Timer(maxTime / 1000, stop_search, args=(True, True))
+        maxTime_timer.start()
     
     i = 1
     total_nodes = 0
@@ -88,6 +94,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     
     bestValue = Value(-VALUE_INFINITE, rootStm)
     bestMove = None
+    bestMoveChanges = 0
     prevBestValue = rootScore
     prevBestMove = rootBestMove
     
@@ -114,6 +121,16 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 if option("debug"):
                     print(f"info string Timeman: Early abort")
                 return
+            
+        # Time management
+        # Use more time if bestMove is unstable
+        if optTime:
+            optTime *= (1 + 1.5 * math.log10(bestMoveChanges))
+            # reset timer
+            optTime_timer.cancel()
+            optTime_timer = threading.Timer(optTime / 1000, stop_search, args=(True, False))
+            optTime_timer.start()
+            
         
         for move in rootMoves:
             # Check for stopped search
@@ -211,6 +228,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             rootMovesPos[move] = pos = utils.push_pv(pos, pv, info)
             
             if value > bestValue:
+                if move != bestMove:
+                    bestMoveChanges += 1
                 bestValue = value
                 bestMove = move
                 
