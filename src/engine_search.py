@@ -99,6 +99,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     bestMoveChanges = 0
     prevBestValue = rootScore
     prevBestMove = rootBestMove
+    prevRecalcIter = -1
     
     root_time = last_output_time = time_now()
     
@@ -262,35 +263,41 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 rootMovesExtraNodes[bestMove] = 1.2  # initial bonus multiplier
             else:
                 rootMovesExtraNodes[bestMove] *= 1.25
-            
-            # Allow re-calculation of move PVs
+        
+        # Allow re-calculation of move PVs
+        if (rootMovesSize / len(rootMoves) < 0.2 or\
+            (abs(bestValue - prevBestValue) > 50 or abs(bestValue - rootScore) > 100))\
+                and i - prevRecalcIter >= 5:
             for m in rootMovesPv.keys():
                 # Delete the end of the PV, depending on how promising the move is.
                 # The more promising it is, the more we delete to allow more accurate calculation.
                 p = promising(m, rootMovesEval, rootMovesSize, i, (m == bestMove),
-                              bestValue) # float from 0 to 1
-                p = min(p, 0.8)
-                
+                              bestValue)  # float from 0 to 1
+                p = min(p, 0.85)
+    
                 # Extra bonus if PV is long
-                p += len(rootMovesPv[m]) / 250
+                p += len(rootMovesPv[m]) / 200
                 # allow deletion of the entire PV only if i >= 10
                 p = min(min(p, 0.9 + i / 100), 1.0)
-                
+    
                 # delete PV
-                del_moves = int(len(rootMovesPv[m]) * p)
+                del_moves = int(len(rootMovesPv[m]) * (1 - p))
                 del_moves = max(del_moves, 1)  # cannot delete root move
+                if option("debug"):
+                    print(f"info string Iteration {i} | Pruned {del_moves} moves from {m}")
                 rootMovesPv[m] = rootMovesPv[m][:del_moves]
-                
+    
                 # update position
                 rootMovesPos[m] = utils.push_pv(rootPos.copy(), rootMovesPv[m])
-                
+    
             # Restart the search
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
             prevBestValue = bestValue
             prevBestMove = bestMove
             bestValue = Value(-VALUE_INFINITE, rootStm)
-            
+            prevRecalcIter = i
+        
         i += 1
         
     # After search is finished
