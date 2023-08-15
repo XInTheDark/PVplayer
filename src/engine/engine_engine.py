@@ -1,6 +1,5 @@
 import chess, chess.engine
-import yaml
-import utils
+
 from engine_ucioption import *
 
 def __engine__(fen: str = None, depth: int = None, nodes: int = None, time: int = None, mate: int = None):

@@ -1,7 +1,7 @@
 import chess, chess.engine
 
 import engine_engine
-import utils
+import engine_utils as utils
 from engine_search_h import *
 from engine_ucioption import *
 from engine_timeman import *

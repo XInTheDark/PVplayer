@@ -1,6 +1,6 @@
 import chess
 
-import utils
+import utils.utils as utils
 import datetime
 import os
 

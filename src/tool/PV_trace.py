@@ -2,9 +2,9 @@ import chess, chess.engine
 import yaml
 
 import engine
-import utils
+import utils.utils as utils
 import print_board as printBoard
-import query_tb
+import query_tb as query_tb
 
 def tracePV(startfen: str, MAX_MOVES=20, MAX_ITER=100, depth:int=None, nodes:int=None, time:int=None, mate:int=None,
             print_board=True, stop_on_tbhit=True, query_on_tbhit=True,

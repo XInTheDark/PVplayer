@@ -2,8 +2,9 @@
 
 # Delete current pvengine executable
 rm pvengine
+rm build/pvengine
 
-pyinstaller engine_main.py --onefile -n pvengine
+pyinstaller src/engine/engine_main.py --onefile -n pvengine
 
 # Path: src/dist/pvengine
 
@@ -11,8 +12,10 @@ pyinstaller engine_main.py --onefile -n pvengine
 rm -rf build
 rm pvengine.spec
 
-# Move the pvengine executable to src folder
-mv dist/pvengine pvengine
+# Move the pvengine executable to build folder
+# create build folder if it doesn't exist
+mkdir -p build
+mv dist/pvengine build/pvengine
 
 # Delete the dist folder
 rm -rf dist

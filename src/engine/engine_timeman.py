@@ -1,5 +1,5 @@
 import chess
-import utils
+import engine_utils as utils
 import math
 
 from engine_ucioption import *

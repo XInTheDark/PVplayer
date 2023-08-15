@@ -1,6 +1,6 @@
 import chess, chess.engine
 
-import utils
+import engine_utils as utils
 
 
 class Value:

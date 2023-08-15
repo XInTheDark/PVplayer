@@ -1,8 +1,8 @@
 import chess, chess.engine
 import yaml
-import utils
+import utils.utils as utils
 
-with open("config.yml", "r") as f:
+with open("src/config.yml", "r") as f:
     config = yaml.safe_load(f)
     ENGINE_PATH = config["ENGINE_PATH"]
     engine_options = config["ENGINE_OPTIONS"]

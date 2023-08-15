@@ -1,1 +1,8 @@
 *.yml
+*.pyc
+.DS_Store
+pgns/
+.idea/
+src/__pycache__/
+uci_log.txt
+build/
