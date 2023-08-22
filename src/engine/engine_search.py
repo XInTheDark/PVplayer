@@ -46,6 +46,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     if maxTime:
         maxTime_timer = threading.Timer(maxTime / 1000, stop_search, args=(True, True))
         maxTime_timer.start()
+        
+    # Initialise engine
+    engine_engine.init_engine()
     
     i = 1
     total_nodes = 0
@@ -134,6 +137,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             optTime_timer = threading.Timer(optTime / 1000, stop_search, args=(True, False))
             optTime_timer.start()
             
+        # Increase default_nodes as iteration increases
+        default_nodes *= 1 + 0.00075 * i
+        default_nodes = min(default_nodes, 10 * option("Nodes"))  # cap at 10x default
         
         for move in rootMoves:
             # Check for stopped search

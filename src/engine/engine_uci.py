@@ -124,9 +124,7 @@ def handle_commands():
                 search_thread.start()
                 
             # quit and stop
-            elif command == "quit":
-                exit()
-            elif command == "stop":
+            elif command == "quit" or command == "stop":
                 if search_thread:
                     engine_search.stop_search()
                     search_thread.join()

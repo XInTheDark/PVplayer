@@ -1,7 +1,6 @@
 """
 Special thanks to PyFish for most of the UCI code.
 """
-
 class Option:
     """Types:
     check (on/off), spin (numerical value), combo (choice), button, string
@@ -106,17 +105,24 @@ class Option:
         def __str__(self):
             return f"option name {self.name} type string default {self.default}"
 
+"""
+--------------------
+"""
 
+# Option specific functions
+def on_engine_param_change():
+    from engine_engine import init_engine
+    init_engine()
+    
 # UCI Options
-
 options = {
     "ENGINE_PATH": Option.String("ENGINE_PATH", "stockfish"),
     "MAX_MOVES": Option.Spin("MAX_MOVES", 5, 1, 100),
-    "Nodes": Option.Spin("Nodes", 500000, 0, 2**32),
+    "Nodes": Option.Spin("Nodes", 100000, 0, 1<<32),
     "debug": Option.Check("debug", False),
     
-    "Threads": Option.Spin("Threads", 1, 1, 1024),
-    "Hash": Option.Spin("Hash", 16, 1, 33554432),
+    "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),
+    "Hash": Option.Spin("Hash", 16, 1, 1<<25, func=on_engine_param_change),
     
     "Move Overhead": Option.Spin("Move Overhead", 100, 0, 5000),
 }
@@ -139,3 +145,4 @@ def option(name: str):
 def options_str():
     """Return a string of all options."""
     return "\n".join([str(_) for _ in options.values()])
+    
