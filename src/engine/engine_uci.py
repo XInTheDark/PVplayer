@@ -202,4 +202,5 @@ def process_time(args: list):
 @atexit.register
 def on_exit():
     engine_search.stop_search()
-    engine.quit()
+    if engine is not None:
+        engine.quit()
