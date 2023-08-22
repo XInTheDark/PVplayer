@@ -1,4 +1,3 @@
-*.yml
 *.pyc
 .DS_Store
 pgns/
