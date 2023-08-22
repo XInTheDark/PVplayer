@@ -159,7 +159,6 @@ def uci():
     """
     Start the UCI interface.
     """
-    print("PVplayer chess engine")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)

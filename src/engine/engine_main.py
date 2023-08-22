@@ -4,4 +4,5 @@ def main():
     engine_uci.uci()
 
 if __name__ == "__main__":
+    print("PVplayer chess engine")
     main()
