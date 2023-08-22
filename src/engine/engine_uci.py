@@ -7,8 +7,9 @@ import chess, chess.engine
 import engine_search
 from engine_ucioption import *
 from engine_timeman import Time
+from engine_engine import engine
 
-import threading, sys
+import threading, sys, atexit
 
 
 # constants
@@ -197,3 +198,8 @@ def process_time(args: list):
         pass
     
     return wtime, btime, winc, binc
+
+@atexit.register
+def on_exit():
+    engine_search.stop_search()
+    engine.quit()
