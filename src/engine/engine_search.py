@@ -27,6 +27,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     global STOP_SEARCH, lastNps
     global OPTTIME, MAXTIME
 
+    # start timer immediately for accuracy
+    root_time = last_output_time = time_now()
+
     # initialise timeman object
     timeman.init(rootPos.turn, rootPos.ply())
     optTime = timeman.optTime
@@ -46,6 +49,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     if maxTime:
         maxTime_timer = threading.Timer(maxTime / 1000, stop_search, args=(True, True))
         maxTime_timer.start()
+        if option("debug"):
+            print(f"info string Timeman: Maximum time {maxTime}ms")
         
     # Initialise engine
     engine_engine.init_engine()
@@ -61,7 +66,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     # If we likely don't have enough time to search all moves, only use root engine eval
     if optTime:
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
-            info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime / 1000)
+            info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime)
             score = Value(info["score"])
             bestPv = info["pv"]
             bestMove = bestPv[0]
@@ -103,8 +108,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     prevBestValue = rootScore
     prevBestMove = rootBestMove
     prevRecalcIter = -1
-    
-    root_time = last_output_time = time_now()
     
     while i <= MAX_ITERS:
         # Pre-iteration check:
@@ -148,34 +151,36 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                 # (i.e. we can finish this iteration within maxTime)
                 # then we continue searching until we finish this iteration.
                 # However, estimate a bit more conservatively to avoid wasting time.
+                extraTime = False
                 if OPTTIME and not MAXTIME:
                     move_i = rootMoves.index(move)+1
                     if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * lastNps:
                         if option("debug"):
                             print(f"info string Timeman: Extra time")
-                        continue
-                
-                STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
-                
-                # Use previous iteration best move since this iteration is incomplete
-                bestMove = prevBestMove
-                bestValue = prevBestValue
+                            extraTime = True
+                            
+                if not extraTime:
+                    STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
                     
-                try:
-                    bestPv = rootMovesPv[bestMove]
-                except KeyError:
-                    bestPv = [bestMove]
-
-                time_taken = time_now() - root_time
-                print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
-                      f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(bestPv)}")
-                
-                
-                if len(bestPv) <= 1:
-                    print(f"bestmove {bestMove}")
-                else:
-                    print(f"bestmove {bestMove} ponder {bestPv[1]}")
-                return
+                    # Use previous iteration best move since this iteration is incomplete
+                    bestMove = prevBestMove
+                    bestValue = prevBestValue
+                    
+                    try:
+                        bestPv = rootMovesPv[bestMove]
+                    except KeyError:
+                        bestPv = [bestMove]
+    
+                    time_taken = time_now() - root_time
+                    print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
+                          f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(bestPv)}")
+                    
+                    
+                    if len(bestPv) <= 1:
+                        print(f"bestmove {bestMove}")
+                    else:
+                        print(f"bestmove {bestMove} ponder {bestPv[1]}")
+                    return
                 
             if move in pruned_rootMoves.keys():
                 pruned_iter = pruned_rootMoves[move]
