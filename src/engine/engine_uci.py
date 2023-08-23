@@ -49,9 +49,9 @@ def handle_commands():
     try:
         while True:
             try:
-                command = sys.stdin.readline().strip()
+                command = preprocess(sys.stdin.readline())
             except Exception:
-                break
+                continue
                 
             tm = Time()  # initialize new timeman object
             
@@ -196,6 +196,16 @@ def process_time(args: list):
         pass
     
     return wtime, btime, winc, binc
+
+def preprocess(s: str):
+    s = s.strip()
+    l = []
+    for chunk in s.split():
+        chunk = chunk.replace("\n", "").replace("\r", "").replace("\t", "").replace(" ", "")
+        if chunk != "":
+            l.append(chunk)
+    return ' '.join(l)
+
 
 @atexit.register
 def on_exit():
