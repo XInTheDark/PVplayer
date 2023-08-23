@@ -14,7 +14,7 @@ STOP_SEARCH = OPTTIME = MAXTIME = False
 
 lastNps = 1000000 * option("Threads")
 
-def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, nodes: int = None, movetime: int = None,
+def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, nodes: int = None, movetime: int = None,
            mate: int = None, timeman: Time = Time()):
     """
     Search a position by tracing the PV.
@@ -33,22 +33,18 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     # initialise timeman object
     timeman.init(rootPos.turn, rootPos.ply())
     optTime = timeman.optTime
+    optTimeLeft = optTime
     maxTime = timeman.maxTime
     if movetime:
         optTime = maxTime = movetime
 
     startTime = time_now()
-    optTime_timer = maxTime_timer = None
+    lastTime = startTime
     
-    # Set timer
     if optTime:
-        optTime_timer = threading.Timer(optTime / 1000, stop_search, args=(True, False))
-        optTime_timer.start()
         if option("debug"):
             print(f"info string Timeman: Optimal time {optTime}ms")
     if maxTime:
-        maxTime_timer = threading.Timer(maxTime / 1000, stop_search, args=(True, True))
-        maxTime_timer.start()
         if option("debug"):
             print(f"info string Timeman: Maximum time {maxTime}ms")
         
@@ -109,13 +105,19 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
     prevBestMove = rootBestMove
     prevRecalcIter = -1
     
+    extraTimeIter = 0  # the iteration where we start using extra time
+    
     while i <= MAX_ITERS:
+        # reset constants
+        bestMoveChanges = 0
+        
         # Pre-iteration check:
         # If we estimate that this iteration will take too long,
         # Then we should stop searching in order to save time in timed games.
-        if optTime:
+        if optTimeLeft:
             # Estimate total nodes based on rootMovesSize
-            if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
+            # Be relatively more aggressive as we can always stop later
+            if rootMovesSize * default_nodes > optTimeLeft / 1000 * lastNps * 2:
                 if not bestMove:
                     bestMove = rootBestMove
                 try:
@@ -131,35 +133,35 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
                     print(f"info string Timeman: Early abort")
                 return
             
-        # Time management
-        # Use more time if bestMove is unstable
-        if optTime:
-            optTime *= 1 + 1.5 * math.log10(max(1, bestMoveChanges))
-            # reset timer
-            optTime_timer.cancel()
-            optTime_timer = threading.Timer(optTime / 1000, stop_search, args=(True, False))
-            optTime_timer.start()
-            
         # Increase default_nodes as iteration increases
         default_nodes *= 1 + 0.0025 * i
         default_nodes = min(default_nodes, 10 * option("Nodes"))  # cap at 10x default
         
         for move in rootMoves:
-            # Check for stopped search
+            # Update time management
+            elapsed_total = (time_now() - startTime) * 1000
+            # TODO: Use more time if bestMove is unstable
+            optTimeLeft = optTime - elapsed_total
+            
+            lastTime = time_now()
+            
+            OPTTIME = OPTTIME or (optTimeLeft and optTimeLeft <= 0)
+            MAXTIME = MAXTIME or (maxTime and elapsed_total >= maxTime)
+            STOP_SEARCH = STOP_SEARCH or OPTTIME or MAXTIME
+            
             if STOP_SEARCH or (nodes and total_nodes >= nodes):
                 # Timeman: if optTime has been reached but we are almost done
                 # (i.e. we can finish this iteration within maxTime)
                 # then we continue searching until we finish this iteration.
                 # However, estimate a bit more conservatively to avoid wasting time.
-                extraTime = False
-                if OPTTIME and not MAXTIME:
+                if not extraTimeIter and OPTTIME and not MAXTIME:
                     move_i = rootMoves.index(move)+1
                     if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * lastNps:
                         if option("debug"):
                             print(f"info string Timeman: Extra time")
-                            extraTime = True
+                            extraTimeIter = i
                             
-                if not extraTime:
+                if extraTimeIter < i:
                     STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
                     
                     # Use previous iteration best move since this iteration is incomplete
