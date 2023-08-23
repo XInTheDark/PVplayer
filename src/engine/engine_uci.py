@@ -9,7 +9,7 @@ from engine_ucioption import *
 from engine_timeman import Time
 from engine_engine import engine
 
-import threading, sys, atexit
+import threading, sys, atexit, os
 
 
 # constants
@@ -120,16 +120,22 @@ def handle_commands():
                 # we also do not support pondering.
                 
                 # start search
-                search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS, 
+                search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS,
                                                                             movetime, nodes, tm))
                 search_thread.start()
                 
-            # quit and stop
-            elif command == "quit" or command == "stop":
+            # stop
+            elif command == "stop":
                 if search_thread:
                     engine_search.stop_search()
-                    search_thread.join()
+                    search_thread.join(timeout=0.5)
                     search_thread = None
+            # quit
+            elif command == "quit":
+                if search_thread:
+                    engine_search.stop_search()
+                    search_thread.join(timeout=0.5)
+                os._exit(0)
             
             # option setting
             elif command.startswith("setoption"):
@@ -149,7 +155,7 @@ def handle_commands():
                 setoption(name, value)
     except KeyboardInterrupt:
         exit()
-            
+        
 
 def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
     engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
@@ -166,8 +172,6 @@ def uci():
     uci_thread.start()
     
     while True:
-        uci_thread.join(timeout=0.1)
-        
         if not uci_thread.is_alive():
             # Reset the UCI thread for the next iteration
             uci_thread = threading.Thread(target=handle_commands)
