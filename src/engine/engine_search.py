@@ -35,6 +35,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     optTime = timeman.optTime
     optTimeLeft = optTime
     maxTime = timeman.maxTime
+    useTimeMan = optTime or maxTime
+    
     if movetime:
         optTime = maxTime = movetime
 
@@ -60,7 +62,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     rootMovesSize = len(list(rootMoves))
     
     # If we likely don't have enough time to search all moves, only use root engine eval
-    if optTime:
+    if useTimeMan:
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
             info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime)
             score = Value(info["score"])
@@ -114,7 +116,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
         # Pre-iteration check:
         # If we estimate that this iteration will take too long,
         # Then we should stop searching in order to save time in timed games.
-        if optTimeLeft:
+        if useTimeMan:
             # Estimate total nodes based on rootMovesSize
             # Be relatively more aggressive as we can always stop later
             if rootMovesSize * default_nodes > optTimeLeft / 1000 * lastNps * 2:
@@ -145,23 +147,25 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
             
             lastTime = time_now()
             
-            OPTTIME = OPTTIME or (optTimeLeft and optTimeLeft <= 0)
-            MAXTIME = MAXTIME or (maxTime and elapsed_total >= maxTime)
+            OPTTIME = useTimeMan and (OPTTIME or (optTimeLeft and optTimeLeft <= 0))
+            MAXTIME = useTimeMan and (MAXTIME or (maxTime and elapsed_total >= maxTime))
             STOP_SEARCH = STOP_SEARCH or OPTTIME or MAXTIME
+            NODES_LIMIT_REACHED = nodes and total_nodes >= nodes
             
-            if STOP_SEARCH or (nodes and total_nodes >= nodes):
+            if STOP_SEARCH or NODES_LIMIT_REACHED:
                 # Timeman: if optTime has been reached but we are almost done
                 # (i.e. we can finish this iteration within maxTime)
                 # then we continue searching until we finish this iteration.
                 # However, estimate a bit more conservatively to avoid wasting time.
-                if not extraTimeIter and OPTTIME and not MAXTIME:
-                    move_i = rootMoves.index(move)+1
-                    if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * lastNps:
-                        if option("debug"):
-                            print(f"info string Timeman: Extra time")
-                            extraTimeIter = i
-                            
-                if extraTimeIter < i:
+                if useTimeMan:
+                    if not extraTimeIter and OPTTIME and not MAXTIME:
+                        move_i = rootMoves.index(move)+1
+                        if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * lastNps:
+                            if option("debug"):
+                                print(f"info string Timeman: Extra time")
+                                extraTimeIter = i
+                                
+                if extraTimeIter < i:  # true as long as we did not use extra time
                     STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
                     
                     # Use previous iteration best move since this iteration is incomplete
@@ -176,7 +180,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                     time_taken = time_now() - root_time
                     print(f"info depth {i} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {int(total_nodes / time_taken)} "
                           f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(bestPv)}")
-                    
                     
                     if len(bestPv) <= 1:
                         print(f"bestmove {bestMove}")
