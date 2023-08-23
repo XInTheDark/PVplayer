@@ -170,12 +170,6 @@ def uci():
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
     uci_thread.start()
-    
-    while True:
-        if not uci_thread.is_alive():
-            # Reset the UCI thread for the next iteration
-            uci_thread = threading.Thread(target=handle_commands)
-            uci_thread.start()
         
         
 # Helper functions

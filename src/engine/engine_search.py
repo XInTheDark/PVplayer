@@ -138,7 +138,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=5, depth: int = None, no
             optTime_timer.start()
             
         # Increase default_nodes as iteration increases
-        default_nodes *= 1 + 0.003 * i
+        default_nodes *= 1 + 0.0025 * i
         default_nodes = min(default_nodes, 10 * option("Nodes"))  # cap at 10x default
         
         for move in rootMoves:
