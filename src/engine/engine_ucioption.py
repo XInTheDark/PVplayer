@@ -131,7 +131,7 @@ options = {
 def setoption(name: str, value: str = None):
     """Set an option."""
     if name not in options:
-        return
+        raise KeyError
     options[name].set(value)
 
 

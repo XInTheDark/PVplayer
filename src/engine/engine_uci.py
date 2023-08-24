@@ -140,6 +140,7 @@ def handle_command(command: str):
         # FORMAT: name <id> value <x>
         c = command.split()
         if not c[1] == "name":
+            print("No such option: ")
             return
         try:
             value_index = c.index("value")
@@ -150,7 +151,16 @@ def handle_command(command: str):
         value = " ".join(c[value_index + 1:])
         
         # set the option
-        setoption(name, value)
+        try:
+            setoption(name, value)
+        except KeyError:
+            print(f"No such option: '{name}'. Type 'uci' for all options.")
+        except Exception:
+            print(f"Failed to set option: '{name}'. Type 'uci' for more information.")
+    
+    else:
+        print(f"Unknown command: '{command}'.")
+        return
         
 
 def handle_commands():
