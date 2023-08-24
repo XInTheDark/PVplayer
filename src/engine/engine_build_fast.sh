@@ -10,4 +10,5 @@ cxfreeze -c engine_main.py --target-dir=build --target-name=pvengine
 rm build/frozen_application_license.txt
 
 # First startup is slow, so we run the executable once to activate it
+printf "Activating executable...\n"
 echo "quit" | build/pvengine

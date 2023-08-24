@@ -15,6 +15,9 @@ import threading, sys, atexit, os
 # constants
 MAX_DEPTH = 100
 
+# threads
+search_thread = None
+
 def move_to_uci(move: chess.Move):
     """Convert a chess.Move object to a UCI string."""
     return move.uci()
@@ -42,121 +45,132 @@ def fen_from_str(s: str):
     return [fen, rest]
 
 
-def handle_commands():
+def handle_command(command: str):
+    global search_thread
+    command = preprocess(command)
     pos = chess.Board()
     search_thread = None
     
     try:
-        while True:
+        tm = Time()  # initialize new timeman object
+        
+        if command == "uci":
+            print(f"id name PVplayer")
+            print(f"id author the PVplayer developers (see AUTHORS file)\n")
+            # UCI options
+            print(options_str())
+            print("uciok")
+        elif command == "isready":
+            print("readyok")
+        elif command == "ucinewgame":
+            pos = chess.Board()
+        elif command == "position startpos":
+            pos = chess.Board()
+        elif command.startswith("position startpos moves"):
             try:
-                command = preprocess(sys.stdin.readline())
-            except Exception:
-                continue
-                
-            tm = Time()  # initialize new timeman object
+                moves = command.split("position startpos moves ")[1].split(" ")
+            except IndexError:
+                moves = []
+            for move in moves:
+                pos.push(uci_to_move(move))
+        elif command.startswith("position fen") and "moves" in command:
+            # remove 'position fen '
+            s = ' '.join(command.split(" ")[2:])
+            fen = fen_from_str(s)[0]
+            moves = fen_from_str(s)[1].split()[1:]
+            pos = chess.Board(fen)
+            for move in moves:
+                pos.push(uci_to_move(move))
+        elif command.startswith("position fen"):
+            s = ' '.join(command.split(" ")[2:])
+            fen = fen_from_str(s)[0]
+            pos = chess.Board(fen)
+        elif command.startswith("go"):
+            MAX_ITERS = MAX_DEPTH
             
-            if command == "uci":
-                print(f"id name PVplayer")
-                print(f"id author the PVplayer developers (see AUTHORS file)\n")
-                # UCI options
-                print(options_str())
-                print("uciok")
-            elif command == "isready":
-                print("readyok")
-            elif command == "ucinewgame":
-                pos = chess.Board()
-            elif command == "position startpos":
-                pos = chess.Board()
-            elif command.startswith("position startpos moves"):
-                try:
-                    moves = command.split("position startpos moves ")[1].split(" ")
-                except IndexError:
-                    moves = []
-                for move in moves:
-                    pos.push(uci_to_move(move))
-            elif command.startswith("position fen") and "moves" in command:
-                # remove 'position fen '
-                s = ' '.join(command.split(" ")[2:])
-                fen = fen_from_str(s)[0]
-                moves = fen_from_str(s)[1].split()[1:]
-                pos = chess.Board(fen)
-                for move in moves:
-                    pos.push(uci_to_move(move))
-            elif command.startswith("position fen"):
-                s = ' '.join(command.split(" ")[2:])
-                fen = fen_from_str(s)[0]
-                pos = chess.Board(fen)
-            elif command.startswith("go"):
+            if command.strip() == "go":
+                MAX_ITERS = 10
+                
+            has_arg = command.split(" ").__len__() > 1
+            args = command.split(" ")
+            keyword = command.split(" ")[1] if has_arg else None
+            
+            if has_arg and keyword == "movetime":
+                movetime = int(command.split(" ")[2])
+            else:
+                movetime = None
+            
+            if has_arg and keyword == "nodes":
+                nodes = int(command.split(" ")[2])
+            else:
+                nodes = None
+            
+            if has_arg and keyword == "depth":
+                MAX_ITERS = int(command.split(" ")[2])
+            
+            if has_arg and keyword == "infinite":
                 MAX_ITERS = MAX_DEPTH
-                
-                if command.strip() == "go":
-                    MAX_ITERS = 10
-                    
-                has_arg = command.split(" ").__len__() > 1
-                args = command.split(" ")
-                keyword = command.split(" ")[1] if has_arg else None
-                
-                if has_arg and keyword == "movetime":
-                    movetime = int(command.split(" ")[2])
-                else:
-                    movetime = None
-                
-                if has_arg and keyword == "nodes":
-                    nodes = int(command.split(" ")[2])
-                else:
-                    nodes = None
-                
-                if has_arg and keyword == "depth":
-                    MAX_ITERS = int(command.split(" ")[2])
-                
-                if has_arg and keyword == "infinite":
-                    MAX_ITERS = MAX_DEPTH
-                
-                if has_arg and ("wtime" in args or "btime" in args):
-                    wtime, btime, winc, binc = process_time(args)
-                    tm.__init__(wtime, btime, winc, binc)
-                    
-                # we do not support time controls yet.
-                # we also do not support pondering.
-                
-                # start search
-                search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS,
-                                                                            movetime, nodes, tm))
-                search_thread.start()
-                
-            # stop
-            elif command == "stop":
-                if search_thread:
-                    engine_search.stop_search()
-                    search_thread.join(timeout=0.5)
-                    search_thread = None
-            # quit
-            elif command == "quit":
-                if search_thread:
-                    engine_search.stop_search()
-                    search_thread.join(timeout=0.5)
-                os._exit(0)
             
-            # option setting
-            elif command.startswith("setoption"):
-                # FORMAT: name <id> value <x>
-                c = command.split()
-                if not c[1] == "name":
-                    continue
-                try:
-                    value_index = c.index("value")
-                except ValueError:
-                    # Type = button
-                    value_index = c.__len__()
-                name = " ".join(c[2:value_index])
-                value = " ".join(c[value_index + 1:])
+            if has_arg and ("wtime" in args or "btime" in args):
+                wtime, btime, winc, binc = process_time(args)
+                tm.__init__(wtime, btime, winc, binc)
                 
-                # set the option
-                setoption(name, value)
+            # we do not support time controls yet.
+            # we also do not support pondering.
+            
+            # start search
+            search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS,
+                                                                        movetime, nodes, tm))
+            search_thread.start()
+            
+        # stop
+        elif command == "stop":
+            if search_thread:
+                engine_search.stop_search()
+                search_thread.join(timeout=0.5)
+                search_thread = None
+        # quit
+        elif command == "quit":
+            if search_thread:
+                engine_search.stop_search()
+                search_thread.join(timeout=0.5)
+            os._exit(0)
+        
+        # option setting
+        elif command.startswith("setoption"):
+            # FORMAT: name <id> value <x>
+            c = command.split()
+            if not c[1] == "name":
+                return
+            try:
+                value_index = c.index("value")
+            except ValueError:
+                # Type = button
+                value_index = c.__len__()
+            name = " ".join(c[2:value_index])
+            value = " ".join(c[value_index + 1:])
+            
+            # set the option
+            setoption(name, value)
     except KeyboardInterrupt:
-        exit()
+        os._exit(1)
         
 
+def handle_commands():
+    if len(sys.argv) > 1:
+        command = ' '.join(sys.argv[1:])
+        handle_command(command)
+        while search_thread.is_alive():
+            continue
+        os._exit(0)
+        
+    while True:
+        try:
+            command = preprocess(sys.stdin.readline())
+            handle_command(command)
+        except Exception:
+            continue
+            
 def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
     engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
     
