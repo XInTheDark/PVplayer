@@ -65,7 +65,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     # If we likely don't have enough time to search all moves, only use root engine eval
     if useTimeMan:
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
-            info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime)
+            info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime / 1000)
             score = Value(info["score"])
             bestPv = info["pv"]
             bestMove = bestPv[0]
