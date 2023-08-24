@@ -6,6 +6,7 @@ import chess, chess.engine
 
 import engine_search
 from engine_ucioption import *
+from engine_utils import *
 from engine_timeman import Time
 from engine_engine import engine
 
@@ -53,16 +54,18 @@ def handle_commands():
             except Exception:
                 continue
                 
+            printf(f"uciinput: {command}")
+                
             tm = Time()  # initialize new timeman object
             
             if command == "uci":
-                print(f"id name PVplayer")
-                print(f"id author the PVplayer developers (see AUTHORS file)\n")
+                printf(f"id name PVplayer")
+                printf(f"id author the PVplayer developers (see AUTHORS file)\n")
                 # UCI options
-                print(options_str())
-                print("uciok")
+                printf(options_str())
+                printf("uciok")
             elif command == "isready":
-                print("readyok")
+                printf("readyok")
             elif command == "ucinewgame":
                 pos = chess.Board()
             elif command == "position startpos":
@@ -165,7 +168,8 @@ def uci():
     """
     Start the UCI interface.
     """
-    print("PVplayer chess engine")
+    log_file(True)
+    printf("PVplayer chess engine")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)

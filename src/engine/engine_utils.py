@@ -1,5 +1,9 @@
 import chess, chess.engine
 import datetime
+import sys
+
+LOG_TO_FILE = False
+FILENAME = None
 
 def push_pv(board: chess.Board, pv, info=None, is_tb=False):        
     if type(pv) == str:
@@ -76,7 +80,30 @@ def nodes_to_str(nodes: int):
     """@:return: a string of the number of nodes in millions"""
     return f"{nodes / 1000000:.2f}M"
 
-
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
+def time_log_format():
+    # round to nearest second
+    return datetime.datetime.now().strftime("%H:%M:%S")
+
+def log_file(_bool, filename=f"uci_log_{time_log_format()}.txt"):
+    global LOG_TO_FILE, FILENAME
+    LOG_TO_FILE = _bool
+    FILENAME = filename
+    if _bool:
+        # we want to append to the file
+        sys.stdout = open(filename, "a")
+    else:
+        sys.stdout = sys.__stdout__
+
+def printf(s):
+    global FILENAME
+    if LOG_TO_FILE:
+        sys.stdout = open(FILENAME, "a")
+        sys.stdout.write(f"{time_log_format()} {s}\n")
+        sys.stdout.close()
+        sys.stdout = sys.__stdout__
+        print(s)
+    else:
+        print(s)
