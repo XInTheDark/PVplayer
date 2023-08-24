@@ -155,8 +155,8 @@ def handle_command(command: str):
             setoption(name, value)
         except KeyError:
             print(f"No such option: '{name}'. Type 'uci' for all options.")
-        except Exception:
-            print(f"Failed to set option: '{name}'. Type 'uci' for more information.")
+        except Exception as e:
+            print(f"Failed to set option: '{name}'. Error: {e}")
     
     else:
         print(f"Unknown command: '{command}'.")

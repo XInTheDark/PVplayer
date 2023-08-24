@@ -40,10 +40,7 @@ class Option:
             self.func = func
         
         def set(self, value: str):
-            try:
-                value = int(value)
-            except ValueError:
-                return
+            value = int(value)
             if value < self.min_value or value > self.max_value:
                 return
             
@@ -66,7 +63,7 @@ class Option:
         
         def set(self, value: str):
             if value not in self.choices:
-                return
+                raise ValueError(f"Invalid choice: '{value}'")
             self.value = value
             if self.func:
                 self.func()
