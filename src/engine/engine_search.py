@@ -11,6 +11,7 @@ import threading
 import math
 
 STOP_SEARCH = OPTTIME = MAXTIME = False
+IS_SEARCHING = False
 
 lastNps = 1000000 * option("Threads")
 
@@ -24,8 +25,11 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     param time: Maximum time *per move*
     """
     
-    global STOP_SEARCH, lastNps
+    global STOP_SEARCH, lastNps, IS_SEARCHING
     global OPTTIME, MAXTIME
+    
+    STOP_SEARCH = False
+    IS_SEARCHING = True
 
     # start timer immediately for accuracy
     root_time = last_output_time = time_now()
@@ -75,6 +79,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                 print(f"bestmove {bestMove}")
             else:
                 print(f"bestmove {bestMove} ponder {bestPv[1]}")
+            IS_SEARCHING = False
             return
             
             
@@ -133,6 +138,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                     
                 if option("debug"):
                     print(f"info string Timeman: Early abort")
+                IS_SEARCHING = False
                 return
             
         # Increase default_nodes as iteration increases
@@ -185,6 +191,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                         print(f"bestmove {bestMove}")
                     else:
                         print(f"bestmove {bestMove} ponder {bestPv[1]}")
+                    IS_SEARCHING = False
                     return
                 
             if move in pruned_rootMoves.keys():
@@ -322,6 +329,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
         print(f"bestmove {bestMove}")
     else:
         print(f"bestmove {bestMove} ponder {bestPv[1]}")
+        
+    IS_SEARCHING = False
         
         
 def prune_margin(bestValue: Value, i: int):

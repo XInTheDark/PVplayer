@@ -19,6 +19,7 @@ MAX_DEPTH = 100
 search_thread = None
 
 pos = chess.Board()
+tm = Time()
 
 def move_to_uci(move: chess.Move):
     """Convert a chess.Move object to a UCI string."""
@@ -48,7 +49,7 @@ def fen_from_str(s: str):
 
 
 def handle_command(command: str):
-    global search_thread, pos
+    global search_thread, pos, tm
     command = preprocess(command)
     search_thread = None
 
@@ -64,6 +65,7 @@ def handle_command(command: str):
         print("readyok")
     elif command == "ucinewgame":
         pos = chess.Board()
+        tm = Time()
     elif command == "position startpos":
         pos = chess.Board()
     elif command.startswith("position startpos moves"):
@@ -165,13 +167,14 @@ def handle_command(command: str):
         
 
 def handle_commands():
-    global search_thread, pos
+    global search_thread, pos, tm
     pos = chess.Board()
+    tm = Time()
     if len(sys.argv) > 1:
-        command = ' '.join(sys.argv[1:])
-        handle_command(command)
-        while search_thread.is_alive():
-            continue
+        # split when there is a newline
+        lst = ' '.join(sys.argv[1:]).split("\n")
+        for command in lst:
+            handle_command(command)
         os._exit(0)
         
     while True:
@@ -182,6 +185,9 @@ def handle_commands():
             continue
             
 def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
+    while engine_search.IS_SEARCHING:
+        continue
+    
     engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
     
     
