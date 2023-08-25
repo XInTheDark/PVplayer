@@ -6,6 +6,9 @@ engine: chess.engine.SimpleEngine = None
 
 def init_engine():
     global engine
+    if engine is not None:
+        engine.quit()
+        
     ENGINE_PATH = option("ENGINE_PATH")
     try:
         engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
