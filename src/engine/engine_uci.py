@@ -18,6 +18,8 @@ MAX_DEPTH = 100
 # threads
 search_thread = None
 
+pos = chess.Board()
+
 def move_to_uci(move: chess.Move):
     """Convert a chess.Move object to a UCI string."""
     return move.uci()
@@ -46,9 +48,8 @@ def fen_from_str(s: str):
 
 
 def handle_command(command: str):
-    global search_thread
+    global search_thread, pos
     command = preprocess(command)
-    pos = chess.Board()
     search_thread = None
 
     tm = Time()  # initialize new timeman object
@@ -164,6 +165,8 @@ def handle_command(command: str):
         
 
 def handle_commands():
+    global search_thread, pos
+    pos = chess.Board()
     if len(sys.argv) > 1:
         command = ' '.join(sys.argv[1:])
         handle_command(command)
