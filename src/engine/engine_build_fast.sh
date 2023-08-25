@@ -1,8 +1,7 @@
 # Use cx_freeze to build a faster executable of pvengine
 
-# Delete current pvengine executable
-rm pvengine
-rm build/pvengine
+# Delete current build folder
+rm -rf build
 
 cxfreeze -c engine_main.py --target-dir=build --target-name=pvengine
 

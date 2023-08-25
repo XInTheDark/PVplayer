@@ -1,6 +1,8 @@
 """
 Special thanks to PyFish for most of the UCI code.
 """
+ENGINE_VERSION = "250823-v2.0.0"
+ENGINE_AUTHOR = "J Muzhen"
 
 import chess, chess.engine
 
@@ -195,7 +197,7 @@ def uci():
     """
     Start the UCI interface.
     """
-    print("PVplayer chess engine")
+    print(f"PVengine {ENGINE_VERSION} by {ENGINE_AUTHOR}")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
