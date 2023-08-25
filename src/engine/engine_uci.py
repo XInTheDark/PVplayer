@@ -10,6 +10,7 @@ import engine_search
 from engine_ucioption import *
 from engine_timeman import Time
 from engine_engine import engine
+from engine_utils import *
 
 import threading, sys, atexit, os
 
@@ -58,13 +59,13 @@ def handle_command(command: str):
     tm = Time()  # initialize new timeman object
     
     if command == "uci":
-        print(f"id name PVplayer")
-        print(f"id author the PVplayer developers (see AUTHORS file)\n")
+        printf(f"id name PVplayer")
+        printf(f"id author the PVplayer developers (see AUTHORS file)\n")
         # UCI options
-        print(options_str())
-        print("uciok")
+        printf(options_str())
+        printf("uciok")
     elif command == "isready":
-        print("readyok")
+        printf("readyok")
     elif command == "ucinewgame":
         pos = chess.Board()
         tm = Time()
@@ -145,7 +146,7 @@ def handle_command(command: str):
         # FORMAT: name <id> value <x>
         c = command.split()
         if not c[1] == "name":
-            print("No such option: ")
+            printf("No such option: ")
             return
         try:
             value_index = c.index("value")
@@ -159,12 +160,12 @@ def handle_command(command: str):
         try:
             setoption(name, value)
         except KeyError:
-            print(f"No such option: '{name}'. Type 'uci' for all options.")
+            printf(f"No such option: '{name}'. Type 'uci' for all options.")
         except Exception as e:
-            print(f"Failed to set option: '{name}'. Error: {e}")
+            printf(f"Failed to set option: '{name}'. Error: {e}")
     
     else:
-        print(f"Unknown command: '{command}'.")
+        printf(f"Unknown command: '{command}'.")
         return
         
 
@@ -197,7 +198,7 @@ def uci():
     """
     Start the UCI interface.
     """
-    print(f"{engine_name_uci()}")
+    printf(f"{engine_name_uci()}")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
