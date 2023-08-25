@@ -130,10 +130,11 @@ def handle_command(command: str):
         
     # stop
     elif command == "stop":
+        engine_search.stop_search()
         if search_thread:
-            engine_search.stop_search()
             search_thread.join(timeout=0.5)
             search_thread = None
+            
     # quit
     elif command == "quit":
         if search_thread:

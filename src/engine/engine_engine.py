@@ -7,7 +7,11 @@ engine: chess.engine.SimpleEngine = None
 def init_engine():
     global engine
     ENGINE_PATH = option("ENGINE_PATH")
-    engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
+    try:
+        engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
+    except FileNotFoundError:
+        return
+    
     # UCI options
     engine_options = {
         "Threads": option("Threads"),
