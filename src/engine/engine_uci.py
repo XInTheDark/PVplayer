@@ -59,8 +59,8 @@ def handle_command(command: str):
     tm = Time()  # initialize new timeman object
     
     if command == "uci":
-        printf(f"id name PVplayer")
-        printf(f"id author the PVplayer developers (see AUTHORS file)\n")
+        printf(f"id name {engine_name_uci()}")
+        printf(f"id author {ENGINE_AUTHOR}")
         # UCI options
         printf(options_str())
         printf("uciok")
@@ -199,7 +199,7 @@ def uci():
     """
     Start the UCI interface.
     """
-    printf(f"{engine_name_uci()}")
+    printf(f"{engine_name_uci()} by {ENGINE_AUTHOR}")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
@@ -241,9 +241,8 @@ def preprocess(s: str):
     return ' '.join(l)
 
 def engine_name_uci():
-    authors = ENGINE_AUTHOR
     if ENGINE_VERSION:
-        return f"PVengine {ENGINE_VERSION} by {authors}"
+        return f"PVengine {ENGINE_VERSION}"
     
     git_hash = os.popen("git rev-parse --short=8 HEAD").read().strip()
     date = os.popen("git log -1 --format=%cd --date=format:%Y%m%d").read().strip()
@@ -253,13 +252,13 @@ def engine_name_uci():
         date = ""
         
     if git_hash and date:
-        return f"PVengine dev-{git_hash}-{date} by {authors}"
+        return f"PVengine dev-{git_hash}-{date}"
     elif git_hash:
-        return f"PVengine dev-{git_hash} by {authors}"
+        return f"PVengine dev-{git_hash}"
     elif date:
-        return f"PVengine dev-{date} by {authors}"
+        return f"PVengine dev-{date}"
     
-    return f"PVengine by {authors}"
+    return f"PVengine"
 
 @atexit.register
 def on_exit():
