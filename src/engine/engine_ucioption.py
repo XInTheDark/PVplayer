@@ -1,6 +1,8 @@
 """
 Special thanks to PyFish for most of the UCI code.
 """
+from typing import *
+
 class Option:
     """Types:
     check (on/off), spin (numerical value), combo (choice), button, string
@@ -101,6 +103,37 @@ class Option:
         
         def __str__(self):
             return f"option name {self.name} type string default {self.default}"
+    
+    class SpinOrCombo:
+        """Either a Spin or a Combo. Automatically detects type."""
+        
+        def __init__(self, name: str, default: Union[int, str], min_value: int, max_value: int, choices: list, func: callable = None):
+            self.name = name
+            self.default = default
+            self.value = default
+            self.min_value = min_value
+            self.max_value = max_value
+            self.choices = choices
+            self.func = func
+        
+        def set(self, value: str):
+            if value in self.choices:
+                self.value = value
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    return
+                if value < self.min_value or value > self.max_value:
+                    return
+                self.value = value
+            if self.func:
+                self.func()
+        
+        def __str__(self):
+            return f"option name {self.name} type spin_or_combo default {self.default} " \
+                   f"min {self.min_value} max {self.max_value} var {' '.join(self.choices)}"
+        
 
 """
 --------------------
@@ -115,11 +148,11 @@ def on_engine_param_change():
 options = {
     "ENGINE_PATH": Option.String("ENGINE_PATH", "stockfish"),
     "MAX_MOVES": Option.Spin("MAX_MOVES", 5, 1, 100),
-    "Nodes": Option.Spin("Nodes", 100000, 0, 1<<32),
+    "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1<<32, ["auto"]),
     "debug": Option.Check("debug", False),
     
     "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),
-    "Hash": Option.Spin("Hash", 16, 1, 1<<25, func=on_engine_param_change),
+    "Hash": Option.Spin("Hash", 256, 1, 1<<25, func=on_engine_param_change),
     
     "Move Overhead": Option.Spin("Move Overhead", 100, 0, 5000),
 }

@@ -60,7 +60,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     i = 1
     total_nodes = 0
     
-    default_nodes = option("Nodes")
+    default_nodes = utils.setNodes(option("Nodes"))
     
     rootMoves = list(rootPos.legal_moves)
     rootMovesSize = len(list(rootMoves))
@@ -143,7 +143,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
             
         # Increase default_nodes as iteration increases
         default_nodes *= 1 + 0.0025 * i
-        default_nodes = min(default_nodes, 10 * option("Nodes"))  # cap at 10x default
+        default_nodes = min(default_nodes, 10 * utils.setNodes(option("Nodes")))  # cap at 10x default
         
         for move in rootMoves:
             # Update time management
