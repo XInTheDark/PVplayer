@@ -89,3 +89,6 @@ def setNodes(v):
         assert v == 'auto'
         from engine_search import lastNps
         return lastNps // 5
+    
+def printf(s: str):
+    print(s, flush=True)
