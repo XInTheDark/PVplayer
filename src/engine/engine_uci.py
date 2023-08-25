@@ -1,7 +1,7 @@
 """
 Special thanks to PyFish for most of the UCI code.
 """
-ENGINE_VERSION = "250823-v2.0.0"
+ENGINE_VERSION = ""
 ENGINE_AUTHOR = "J Muzhen"
 
 import chess, chess.engine
@@ -197,7 +197,7 @@ def uci():
     """
     Start the UCI interface.
     """
-    print(f"PVengine {ENGINE_VERSION} by {ENGINE_AUTHOR}")
+    print(f"{engine_name_uci()}")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
@@ -238,6 +238,26 @@ def preprocess(s: str):
             l.append(chunk)
     return ' '.join(l)
 
+def engine_name_uci():
+    authors = ENGINE_AUTHOR
+    if ENGINE_VERSION:
+        return f"PVengine {ENGINE_VERSION} by {authors}"
+    
+    git_hash = os.popen("git rev-parse --short=8 HEAD").read().strip()
+    date = os.popen("git log -1 --format=%cd --date=format:%Y%m%d").read().strip()
+    if 'fatal:' in git_hash or git_hash == "":
+        git_hash = ""
+    if 'fatal:' in date or date == "":
+        date = ""
+        
+    if git_hash and date:
+        return f"PVengine dev-{git_hash}-{date} by {authors}"
+    elif git_hash:
+        return f"PVengine dev-{git_hash} by {authors}"
+    elif date:
+        return f"PVengine dev-{date} by {authors}"
+    
+    return f"PVengine by {authors}"
 
 @atexit.register
 def on_exit():
