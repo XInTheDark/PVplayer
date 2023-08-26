@@ -180,10 +180,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                 if extraTimeIter < i:  # true as long as we did not use extra time
                     STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
                     
-                    # Use previous iteration best move since this iteration is incomplete
-                    bestMove = prevBestMove
-                    bestValue = prevBestValue
-                    
                     try:
                         bestPv = rootMovesPv[bestMove]
                     except KeyError:
