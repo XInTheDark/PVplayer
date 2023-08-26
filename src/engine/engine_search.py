@@ -150,7 +150,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
         
         # Recalculate default_nodes
         default_nodes = utils.setNodes(option("Nodes"))
-        print(default_nodes)
         
         for move in rootMoves:
             # Update time management
