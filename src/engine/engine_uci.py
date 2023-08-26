@@ -120,8 +120,9 @@ def handle_command(command: str):
             wtime, btime, winc, binc = process_time(args)
             tm.__init__(wtime, btime, winc, binc)
             
-        # we do not support time controls yet.
-        # we also do not support pondering.
+        if has_arg and keyword == "ponder":
+            MAX_ITERS = MAX_DEPTH
+            tm.ponder = True
         
         # start search
         search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS,

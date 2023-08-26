@@ -20,6 +20,8 @@ class Time:
     
     optTime = maxTime = 0
     
+    ponder: bool = False
+    
     def __init__(self, wtime: int=0, btime: int=0, winc: int=0, binc: int=0):
         self.wtime = wtime
         self.winc = winc
