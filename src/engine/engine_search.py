@@ -71,7 +71,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     # If we likely don't have enough time to search all moves, only use root engine eval
     if useTimeMan:
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
-            info: chess.engine.InfoDict = __engine__(fen=rootPos.fen(), time=optTime / 1000)
+            info: chess.engine.InfoDict = __engine__(pos=rootPos, time=optTime / 1000)
             score = Value(info["score"])
             bestPv = info["pv"]
             bestMove = bestPv[0]
@@ -86,7 +86,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
             return
             
             
-    info: chess.engine.InfoDict = __engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=None,
+    info: chess.engine.InfoDict = __engine__(pos=rootPos, depth=depth, nodes=default_nodes, time=None,
                                                            mate=mate)
     
     rootScore = Value(info["score"])
@@ -232,7 +232,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                 
             move_nodes = calc_nodes(move, bestValue, i, default_nodes, prevEval, (move==bestMove), rootMovesExtraNodes)
             
-            info: chess.engine.InfoDict = __engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=None,
+            info: chess.engine.InfoDict = __engine__(pos=pos, depth=depth, nodes=move_nodes, time=None,
                                                                    mate=mate)
             total_nodes += info["nodes"]
             lastNps = info["nps"]

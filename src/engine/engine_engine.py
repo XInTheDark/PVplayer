@@ -28,7 +28,7 @@ def setoptions_engine():
         engine.configure({name: value})
         
 
-def __engine__(fen: str = None, depth: int = None, nodes: int = None,
+def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
                time: int = None, mate: int = None):
     """
     fen: FEN string
@@ -38,12 +38,9 @@ def __engine__(fen: str = None, depth: int = None, nodes: int = None,
     """
     global engine
     
-    # Create board
-    board = chess.Board(fen)
-    
     # Create a new limit
     limit = chess.engine.Limit(depth=depth, nodes=nodes, time=time, mate=mate)
     
     # Evaluate with engine
-    result = engine.analyse(board, limit)
+    result = engine.analyse(pos, limit)
     return result
