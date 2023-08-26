@@ -2,6 +2,7 @@
 Special thanks to PyFish for most of the UCI code.
 """
 ENGINE_VERSION = ""
+ENGINE_NAME = "PVengine"
 ENGINE_AUTHOR = "J Muzhen"
 
 import chess, chess.engine
@@ -55,12 +56,14 @@ def fen_from_str(s: str):
 def handle_command(command: str):
     global search_thread, pos, tm
     command = preprocess(command)
+    if command == "":
+        return
     search_thread = None
 
     tm = Time()  # initialize new timeman object
     
     if command == "uci":
-        printf(f"id name {engine_name_uci()}")
+        printf(f"id name {ENGINE_NAME}")
         printf(f"id author {ENGINE_AUTHOR}")
         # UCI options
         printf(options_str())
@@ -207,7 +210,9 @@ def uci():
     """
     Start the UCI interface.
     """
-    printf(f"{engine_name_uci()} by {ENGINE_AUTHOR}")
+    global ENGINE_NAME
+    ENGINE_NAME = engine_name_uci()
+    printf(f"{ENGINE_NAME} by {ENGINE_AUTHOR}")
     
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
