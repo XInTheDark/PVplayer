@@ -149,7 +149,7 @@ def on_engine_param_change():
 # UCI Options
 options = {
     "ENGINE_PATH": Option.String("ENGINE_PATH", "stockfish"),
-    "MAX_MOVES": Option.Spin("MAX_MOVES", 5, 1, 100),
+    "MAX_MOVES": Option.Spin("MAX_MOVES", 2, 1, 100),
     "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1<<32, ["auto"]),
     "debug": Option.Check("debug", False),
     
