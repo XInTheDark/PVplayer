@@ -1,5 +1,6 @@
 import chess, chess.engine
-import datetime
+import datetime, math
+from engine_ucioption import *
 
 def push_pv(board: chess.Board, pv, info=None, is_tb=False):        
     if type(pv) == str:
@@ -88,7 +89,8 @@ def setNodes(v):
     else:
         assert v == 'auto'
         from engine_search import lastNps
-        return lastNps // 5
+        div = (5 - math.log10(option("Threads")))
+        return int(lastNps / div)
     
 def printf(s: str):
     print(s, flush=True)

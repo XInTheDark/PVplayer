@@ -1,11 +1,12 @@
 import chess, chess.engine
 
-import engine_engine
 import engine_utils as utils
 from engine_utils import printf
 from engine_search_h import *
 from engine_ucioption import *
 from engine_timeman import *
+import engine_engine
+from engine_engine import __engine__, init_engine
 
 from time import time as time_now
 import threading
@@ -55,8 +56,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
         if option("debug"):
             printf(f"info string Timeman: Maximum time {maxTime}ms")
         
-    # Initialise engine
-    engine_engine.init_engine()
+    # Initialise engine if not already initialised
+    if not engine_is_alive():
+        init_engine()
     
     i = 1
     total_nodes = 0
@@ -69,7 +71,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
     # If we likely don't have enough time to search all moves, only use root engine eval
     if useTimeMan:
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
-            info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), time=optTime / 1000)
+            info: chess.engine.InfoDict = __engine__(fen=rootPos.fen(), time=optTime / 1000)
             score = Value(info["score"])
             bestPv = info["pv"]
             bestMove = bestPv[0]
@@ -84,7 +86,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
             return
             
             
-    info: chess.engine.InfoDict = engine_engine.__engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=None,
+    info: chess.engine.InfoDict = __engine__(fen=rootPos.fen(), depth=depth, nodes=default_nodes, time=None,
                                                            mate=mate)
     
     rootScore = Value(info["score"])
@@ -145,6 +147,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
         # Increase default_nodes as iteration increases
         default_nodes *= 1 + 0.0025 * i
         default_nodes = min(default_nodes, 10 * utils.setNodes(option("Nodes")))  # cap at 10x default
+        
+        # Recalculate default_nodes
+        default_nodes = utils.setNodes(option("Nodes"))
+        print(default_nodes)
         
         for move in rootMoves:
             # Update time management
@@ -227,7 +233,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
                 
             move_nodes = calc_nodes(move, bestValue, i, default_nodes, prevEval, (move==bestMove), rootMovesExtraNodes)
             
-            info: chess.engine.InfoDict = engine_engine.__engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=None,
+            info: chess.engine.InfoDict = __engine__(fen=pos.fen(), depth=depth, nodes=move_nodes, time=None,
                                                                    mate=mate)
             total_nodes += info["nodes"]
             lastNps = info["nps"]
@@ -429,3 +435,11 @@ def stop_search(optTime=False, maxTime=False):
         OPTTIME = True
     if maxTime:
         MAXTIME = True
+
+def engine_is_alive():
+    try:
+        engine_engine.engine.ping()
+        return True
+    except Exception:
+        return False
+    

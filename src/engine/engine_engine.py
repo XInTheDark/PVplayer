@@ -15,6 +15,10 @@ def init_engine():
     except FileNotFoundError:
         return
     
+    setoptions_engine()
+
+def setoptions_engine():
+    global engine
     # UCI options
     engine_options = {
         "Threads": option("Threads"),
@@ -23,6 +27,7 @@ def init_engine():
     for name, value in engine_options.items():
         engine.configure({name: value})
         
+
 def __engine__(fen: str = None, depth: int = None, nodes: int = None,
                time: int = None, mate: int = None):
     """

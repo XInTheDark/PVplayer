@@ -141,8 +141,10 @@ class Option:
 
 # Option specific functions
 def on_engine_param_change():
-    from engine_engine import init_engine
-    init_engine()
+    """Called when the engine parameters are changed."""
+    from engine_engine import setoptions_engine
+    setoptions_engine()
+
     
 # UCI Options
 options = {
