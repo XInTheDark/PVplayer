@@ -41,14 +41,15 @@ def fen_from_str(s: str):
     where the first element in the list is the FEN and the remaining is the rest of the string.
     """
     
-    l = s.split(" ")
-    if len(l) < 6:
-        raise ValueError("Invalid FEN")
+    if "moves" in s:
+        s = s.split(" moves ")
+        fen = s[0]
+        moves = s[1]
+    else:
+        fen = s
+        moves = ""
     
-    fen = " ".join(l[:6])
-    rest = " ".join(l[6:])
-    
-    return [fen, rest]
+    return [fen, moves]
 
 
 def handle_command(command: str):
@@ -77,15 +78,22 @@ def handle_command(command: str):
         except IndexError:
             moves = []
         for move in moves:
-            pos.push(uci_to_move(move))
+            move = uci_to_move(move)
+            if not pos.is_legal(move):
+                break
+            pos.push(move)
     elif command.startswith("position fen") and "moves" in command:
         # remove 'position fen '
         s = ' '.join(command.split(" ")[2:])
-        fen = fen_from_str(s)[0]
-        moves = fen_from_str(s)[1].split()[1:]
+        obj = fen_from_str(s)
+        fen = obj[0]
+        moves = obj[1].split()
         pos = chess.Board(fen)
         for move in moves:
-            pos.push(uci_to_move(move))
+            move = uci_to_move(move)
+            if not pos.is_legal(move):
+                break
+            pos.push(move)
     elif command.startswith("position fen"):
         s = ' '.join(command.split(" ")[2:])
         fen = fen_from_str(s)[0]

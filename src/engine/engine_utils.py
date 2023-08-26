@@ -7,14 +7,13 @@ def push_pv(board: chess.Board, pv, info=None, is_tb=False):
         pv = pv.split('pv')[-1]
         pv = pv.split()
         
-        for move in pv:
-            move = chess.Move.from_uci(move)
+        pv = [chess.Move.from_uci(move) for move in pv]
     
-    rule50 = board.halfmove_clock
-    for move in pv:        
+    for move in pv:
+        if not board.is_legal(move):
+            break
         board.push(move)
-        
-        if board.is_game_over(claim_draw=True):
+        if board.is_game_over():
             break
     
     return board
