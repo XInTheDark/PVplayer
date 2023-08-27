@@ -1,8 +1,12 @@
-import chess, chess.engine
-import datetime, math
+import math
+
+import chess
+import chess.engine
+
 from engine_ucioption import *
 
-def push_pv(board: chess.Board, pv, info=None, is_tb=False):        
+
+def push_pv(board: chess.Board, pv, info=None, is_tb=False):
     if type(pv) == str:
         pv = pv.split('pv')[-1]
         pv = pv.split()
@@ -57,7 +61,7 @@ def score_to_cp(score):
     elif type(score) == chess.engine.PovScore:
         """if type if PovScore, we also convert to white's POV"""
         return score.white().cp
-    
+
 
 def pv_to_uci(pv):
     s = ""
@@ -66,7 +70,7 @@ def pv_to_uci(pv):
     
     # remove the last space
     return s[:-1]
-    
+
 
 def is_drawn_score(score):
     return score == "0.00" or score == "0" or score == 0 or score == chess.engine.Cp(0)
@@ -80,6 +84,7 @@ def nodes_to_str(nodes: int):
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
+
 def setNodes(v):
     """Set default_nodes based on UCI input.
     This value is either an integer or 'auto'."""
@@ -90,6 +95,7 @@ def setNodes(v):
         from engine_search import lastNps
         div = (5 - math.log10(option("Threads")))
         return int(lastNps / div)
-    
+
+
 def printf(s: str):
     print(s, flush=True)

@@ -5,16 +5,17 @@ ENGINE_VERSION = ""
 ENGINE_NAME = "PVengine"
 ENGINE_AUTHOR = "J Muzhen"
 
-import chess, chess.engine
+import atexit
+import os
+import sys
+import threading
+
+import chess.engine
 
 import engine_search
-from engine_ucioption import *
-from engine_timeman import Time
 from engine_engine import engine
+from engine_timeman import Time
 from engine_utils import *
-
-import threading, sys, atexit, os
-
 
 # constants
 MAX_DEPTH = 100
@@ -24,6 +25,7 @@ search_thread = None
 
 pos = chess.Board()
 tm = Time()
+
 
 def move_to_uci(move: chess.Move):
     """Convert a chess.Move object to a UCI string."""
@@ -59,7 +61,7 @@ def handle_command(command: str):
     if command == "":
         return
     search_thread = None
-
+    
     tm = Time()  # initialize new timeman object
     
     if command == "uci":
@@ -106,7 +108,7 @@ def handle_command(command: str):
         
         if command.strip() == "go":
             MAX_ITERS = 10
-            
+        
         has_arg = command.split(" ").__len__() > 1
         args = command.split(" ")
         keyword = command.split(" ")[1] if has_arg else None
@@ -130,22 +132,19 @@ def handle_command(command: str):
         if has_arg and ("wtime" in args or "btime" in args):
             wtime, btime, winc, binc = process_time(args)
             tm.__init__(wtime, btime, winc, binc)
-            
-        # we do not support time controls yet.
-        # we also do not support pondering.
         
         # start search
         search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS,
                                                                     movetime, nodes, tm))
         search_thread.start()
-        
+    
     # stop
     elif command == "stop":
         engine_search.stop_search()
         if search_thread:
             search_thread.join(timeout=0.5)
             search_thread = None
-            
+    
     # quit
     elif command == "quit":
         if search_thread:
@@ -179,7 +178,7 @@ def handle_command(command: str):
     else:
         printf(f"Unknown command: '{command}'.")
         return
-        
+
 
 def handle_commands():
     global search_thread, pos, tm
@@ -191,21 +190,22 @@ def handle_commands():
         for command in lst:
             handle_command(command)
         os._exit(0)
-        
+    
     while True:
         try:
             command = preprocess(sys.stdin.readline())
             handle_command(command)
         except Exception:
             continue
-            
+
+
 def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
     while engine_search.IS_SEARCHING:
         continue
     
     engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
-    
-    
+
+
 def uci():
     """
     Start the UCI interface.
@@ -217,8 +217,8 @@ def uci():
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
     uci_thread.start()
-        
-        
+
+
 # Helper functions
 def process_time(args: list):
     wtime = btime = winc = binc = 0
@@ -244,6 +244,7 @@ def process_time(args: list):
     
     return wtime, btime, winc, binc
 
+
 def preprocess(s: str):
     s = s.strip()
     l = []
@@ -252,6 +253,7 @@ def preprocess(s: str):
         if chunk != "":
             l.append(chunk)
     return ' '.join(l)
+
 
 def engine_name_uci():
     if ENGINE_VERSION:
@@ -263,7 +265,7 @@ def engine_name_uci():
         git_hash = ""
     if 'fatal:' in date or date == "":
         date = ""
-        
+    
     if git_hash and date:
         return f"PVengine dev-{git_hash}-{date}"
     elif git_hash:
@@ -272,6 +274,7 @@ def engine_name_uci():
         return f"PVengine dev-{date}"
     
     return f"PVengine"
+
 
 @atexit.register
 def on_exit():

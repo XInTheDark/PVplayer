@@ -1,8 +1,10 @@
-import chess
-import engine_utils as utils
 import math
 
+import chess
+
+import engine_utils as utils
 from engine_ucioption import *
+
 
 class Time:
     """
@@ -20,7 +22,7 @@ class Time:
     
     optTime = maxTime = 0
     
-    def __init__(self, wtime: int=0, btime: int=0, winc: int=0, binc: int=0):
+    def __init__(self, wtime: int = 0, btime: int = 0, winc: int = 0, binc: int = 0):
         self.wtime = wtime
         self.winc = winc
         self.btime = btime
@@ -33,7 +35,6 @@ class Time:
     
     def get_inc(self, c: chess.Color):
         return self.inc[int(c)]
-    
     
     def init(self, us: chess.Color, ply: int):
         """Much of the calculation algorithm is derived from Stockfish."""
@@ -51,9 +52,9 @@ class Time:
         
         # Use more time at start of game
         startExtra = 1 + (16 - ply) * 0.15 if ply < 16 else 1.0
-
+        
         optScale = min((0.88 + ply / 116.4) / 50,
-            0.88 * self.time[us] / timeLeft) * optExtra * startExtra
+                       0.88 * self.time[us] / timeLeft) * optExtra * startExtra
         maxScale = 6.3
         
         # Never use more than 80% of the available time for this move
