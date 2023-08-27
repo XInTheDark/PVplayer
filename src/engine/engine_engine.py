@@ -1,14 +1,16 @@
-import chess, chess.engine
+import chess
+import chess.engine
 
 from engine_ucioption import *
 
 engine: chess.engine.SimpleEngine = None
 
+
 def init_engine():
     global engine
     if engine is not None:
         engine.quit()
-        
+    
     ENGINE_PATH = option("ENGINE_PATH")
     try:
         engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
@@ -16,6 +18,7 @@ def init_engine():
         return
     
     setoptions_engine()
+
 
 def setoptions_engine():
     global engine
@@ -26,7 +29,7 @@ def setoptions_engine():
     }
     for name, value in engine_options.items():
         engine.configure({name: value})
-        
+
 
 def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
                time: int = None, mate: int = None):

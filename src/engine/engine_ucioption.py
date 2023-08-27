@@ -3,6 +3,7 @@ Special thanks to PyFish for most of the UCI code.
 """
 from typing import *
 
+
 class Option:
     """Types:
     check (on/off), spin (numerical value), combo (choice), button, string
@@ -107,7 +108,8 @@ class Option:
     class SpinOrCombo:
         """Either a Spin or a Combo. Automatically detects type."""
         
-        def __init__(self, name: str, default: Union[int, str], min_value: int, max_value: int, choices: list, func: callable = None):
+        def __init__(self, name: str, default: Union[int, str], min_value: int, max_value: int, choices: list,
+                     func: callable = None):
             self.name = name
             self.default = default
             self.value = default
@@ -133,11 +135,12 @@ class Option:
         def __str__(self):
             return f"option name {self.name} type spin_or_combo default {self.default} " \
                    f"min {self.min_value} max {self.max_value} var {' '.join(self.choices)}"
-        
+
 
 """
 --------------------
 """
+
 
 # Option specific functions
 def on_engine_param_change():
@@ -145,16 +148,16 @@ def on_engine_param_change():
     from engine_engine import setoptions_engine
     setoptions_engine()
 
-    
+
 # UCI Options
 options = {
     "ENGINE_PATH": Option.String("ENGINE_PATH", "stockfish"),
     "MAX_MOVES": Option.Spin("MAX_MOVES", 2, 1, 100),
-    "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1<<32, ["auto"]),
+    "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1 << 32, ["auto"]),
     "debug": Option.Check("debug", False),
     
     "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),
-    "Hash": Option.Spin("Hash", 256, 1, 1<<25, func=on_engine_param_change),
+    "Hash": Option.Spin("Hash", 256, 1, 1 << 25, func=on_engine_param_change),
     
     "Move Overhead": Option.Spin("Move Overhead", 100, 0, 5000),
 }
@@ -177,4 +180,3 @@ def option(name: str):
 def options_str():
     """Return a string of all options."""
     return "\n".join([str(_) for _ in options.values()])
-    

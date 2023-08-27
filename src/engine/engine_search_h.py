@@ -1,4 +1,5 @@
-import chess, chess.engine
+import chess
+import chess.engine
 
 import engine_utils as utils
 
@@ -26,7 +27,7 @@ class Value:
         elif type(value) == chess.engine.Cp:
             self.value = value.score(mate_score=100000)
         self.pov = pov
-        
+    
     def __int__(self):
         return self.value
     
@@ -45,24 +46,28 @@ class Value:
         if other.pov is not None and other.pov != self.pov:
             return self.value < -other.value
         return self.value < other.value
+    
     def __gt__(self, other):
         if type(other) == int:
             return self.value > other
         if other.pov is not None and other.pov != self.pov:
             return self.value > -other.value
         return self.value > other.value
+    
     def __eq__(self, other):
         if type(other) == int:
             return self.value == other
         if other.pov is not None and other.pov != self.pov:
             return self.value == -other.value
         return self.value == other.value
+    
     def __le__(self, other):
         if type(other) == int:
             return self.value <= other
         if other.pov is not None and other.pov != self.pov:
             return self.value <= -other.value
         return self.value <= other.value
+    
     def __ge__(self, other):
         if type(other) == int:
             return self.value >= other
@@ -75,18 +80,22 @@ class Value:
         if type(other) == int:
             return self.value + other
         return self.value + other.value
+    
     def __sub__(self, other):
         if type(other) == int:
             return self.value - other
         return self.value - other.value
+    
     def __mul__(self, other):
         if type(other) == int:
             return self.value * other
         return self.value * other.value
+    
     def __truediv__(self, other):
         if type(other) == int:
             return self.value / other
         return self.value / other.value
+    
     def __floordiv__(self, other):
         if type(other) == int:
             return self.value // other
@@ -95,8 +104,8 @@ class Value:
     def white(self):
         if self.pov:
             return self.value if self.pov == chess.WHITE else -self.value
-        
-        
+
+
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
