@@ -16,9 +16,7 @@ import engine_search
 from engine_engine import engine
 from engine_timeman import Time
 from engine_utils import *
-
-# constants
-MAX_DEPTH = 100
+from engine_search_h import *
 
 # threads
 search_thread = None

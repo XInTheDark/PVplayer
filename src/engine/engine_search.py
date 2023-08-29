@@ -14,7 +14,7 @@ IS_SEARCHING = False
 lastNps = 1000000 * option("Threads")
 
 
-def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, nodes: int = None, movetime: int = None,
+def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = None, nodes: int = None, movetime: int = None,
            mate: int = None, timeman: Time = Time()):
     """
     Search a position by tracing the PV.
