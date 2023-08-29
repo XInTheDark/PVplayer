@@ -226,7 +226,12 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=100, depth: int = None, 
             
             info: chess.engine.InfoDict = __engine__(pos=pos, depth=depth, nodes=move_nodes, time=None,
                                                      mate=mate)
-            total_nodes += info["nodes"]
+            try:
+                total_nodes += info["nodes"]
+            except KeyError:
+                stop_search(True, True)
+                continue
+                
             lastNps = info["nps"]
             pv = info["pv"]
             pv = pv[:MAX_MOVES]
