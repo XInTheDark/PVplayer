@@ -114,9 +114,6 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
     extraTimeIter = 0  # the iteration where we start using extra time
     
     while i <= MAX_ITERS:
-        # reset constants
-        bestMoveChanges = 0
-        
         # Pre-iteration check:
         # If we estimate that this iteration will take too long,
         # Then we should stop searching in order to save time in timed games.
@@ -146,11 +143,21 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
         
         # Recalculate default_nodes
         default_nodes = setNodes(option("Nodes"), i)
+
+        # Use more time for this iteration if bestMove is unstable
+        if bestMoveChanges > 0:
+            bestMoveInstability = 0.8 + 1.5 * math.log10(bestMoveChanges + 1) / option("Threads")
+            optTime = optTime * bestMoveInstability
+            if option("debug"):
+                printf(f"info string Timeman: bestMoveChanges {bestMoveChanges}, scale {bestMoveInstability}")
         
+        # reset constants
+        bestMoveChanges = 0
+        
+        # moves loop
         for move in rootMoves:
             # Update time management
             elapsed_total = (time_now() - startTime) * 1000
-            # TODO: Use more time if bestMove is unstable
             optTimeLeft = optTime - elapsed_total
             
             OPTTIME = useTimeMan and (OPTTIME or (optTimeLeft and optTimeLeft <= 0))
@@ -230,7 +237,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
             IS_GAME_OVER = pos.is_game_over(claim_draw=True)
             OUTCOME = pos.outcome(claim_draw=True)
             if IS_GAME_OVER:
-                if OUTCOME.winner is None:
+                if OUTCOME.winner is None or pos.is_repetition():
                     value = Value(VALUE_DRAW)
                 else:
                     value = Value(VALUE_MATE, OUTCOME.winner)
