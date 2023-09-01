@@ -128,7 +128,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
                     bestMove = rootBestMove
                 try:
                     ponderMove = rootMovesPv[bestMove][1]
-                except KeyError:
+                except Exception:  # KeyError, IndexError, etc
                     ponderMove = None
                 if ponderMove:
                     printf(f"bestmove {bestMove} ponder {ponderMove}")
