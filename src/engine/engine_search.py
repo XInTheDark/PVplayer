@@ -59,7 +59,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
     i = 1
     total_nodes = 0
     
-    default_nodes = utils.setNodes(option("Nodes"))
+    default_nodes = setNodes(option("Nodes"), i)
     
     rootMoves = list(rootPos.legal_moves)
     rootMovesSize = len(list(rootMoves))
@@ -142,10 +142,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
         
         # Increase default_nodes as iteration increases
         default_nodes *= 1 + 0.0025 * i
-        default_nodes = min(default_nodes, 10 * utils.setNodes(option("Nodes")))  # cap at 10x default
+        default_nodes = min(default_nodes, 10 * setNodes(option("Nodes"), i))  # cap at 10x default
         
         # Recalculate default_nodes
-        default_nodes = utils.setNodes(option("Nodes"))
+        default_nodes = setNodes(option("Nodes"), i)
         
         for move in rootMoves:
             # Update time management
@@ -395,6 +395,18 @@ def calc_nodes(move: chess.Move, bestValue: Value, i: int, default_nodes: int, p
         scale *= rootMovesExtraNodes[move]
     
     return int(default_nodes * scale)
+
+
+def setNodes(v, i: int):
+    """Set default_nodes based on UCI input.
+    This value is either an integer or 'auto'."""
+    if type(v) == int:
+        return v
+    else:
+        assert v == 'auto'
+        div = 5.0 - math.log10(option("Threads")) - 2.5 * math.log10(i)
+        div = clamp(div, 0.25, 5.0)
+        return int(lastNps / div)
 
 
 def promising(move: chess.Move, rootMovesEval: dict, rootMovesSize: int, i: int, is_best: bool,

@@ -85,17 +85,5 @@ def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
 
-def setNodes(v):
-    """Set default_nodes based on UCI input.
-    This value is either an integer or 'auto'."""
-    if type(v) == int:
-        return v
-    else:
-        assert v == 'auto'
-        from engine_search import lastNps
-        div = (5 - math.log10(option("Threads")))
-        return int(lastNps / div)
-
-
 def printf(s: str):
     print(s, flush=True)
