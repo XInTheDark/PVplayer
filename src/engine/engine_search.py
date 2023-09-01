@@ -264,13 +264,16 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
                 rootMovesDepth[move] = depth
             
             if not IS_GAME_OVER:
-                value = Value(info["score"], rootStm)
+                value = Value(info["score"], pos.turn)
+            
+            # Convert value to our pov
+            value = value.to_pov(rootStm)
             
             # update rootMovesEval
             rootMovesEval[move] = value
             
             if option("debug"):
-                printf(f"info string Iteration {i} | Move: {move} | Eval: {value}")
+                printf(f"info string Iteration {i} | Move: {move} | Eval: {value} | POV: {value.to_pov(rootStm)}")
             
             rootMovesPos[move] = pos = utils.push_pv(pos, pv, info)
             
@@ -312,7 +315,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
         # Allow re-calculation of move PVs
         if (rootMovesSize / len(rootMoves) < 0.2 or \
             (abs(bestValue - prevBestValue) > 50 or abs(bestValue - rootScore) > 100)) \
-                and i <= 20 and i - prevRecalcIter >= 5:
+                and i - prevRecalcIter >= 5:
             for m in rootMovesPv.keys():
                 # Delete the end of the PV, depending on how promising the move is.
                 # The more promising it is, the more we delete to allow more accurate calculation.
@@ -327,9 +330,9 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
                 
                 # delete PV
                 del_moves = int(len(rootMovesPv[m]) * (1 - p))
-                del_moves = max(del_moves, 1)  # cannot delete root move
+                del_moves = max(del_moves, 1 + i // 20)  # cannot delete root move
                 if option("debug"):
-                    printf(f"info string Iteration {i} | Pruned {del_moves} moves from {m}")
+                    printf(f"info string Iteration {i} | Kept {del_moves} moves in {m}")
                 rootMovesPv[m] = rootMovesPv[m][:del_moves]
                 
                 # update position

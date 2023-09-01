@@ -112,6 +112,11 @@ class Value:
     def white(self):
         if self.pov:
             return self.value if self.pov == chess.WHITE else -self.value
+    
+    def to_pov(self, pov):
+        if self.pov is not None:
+            return Value(self.value, pov) if self.pov == pov else Value(-self.value, pov)
+        return Value(self.value, pov)
 
 
 def clamp(value, min_value, max_value):
