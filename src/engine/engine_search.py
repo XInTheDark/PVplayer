@@ -223,18 +223,28 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
             
             move_nodes = calc_nodes(move, bestValue, i, default_nodes, prevEval, (move == bestMove),
                                     rootMovesExtraNodes)
+            value = Value()
+            pv = []
             
+            # Pre-handling of checkmate, stalemate, draw, etc.
+            IS_GAME_OVER = pos.is_game_over(claim_draw=True)
+            OUTCOME = pos.outcome(claim_draw=True)
+            if IS_GAME_OVER:
+                if OUTCOME.winner is None:
+                    value = Value(VALUE_DRAW)
+                else:
+                    value = Value(VALUE_MATE, OUTCOME.winner)
+        
+        
             info: chess.engine.InfoDict = __engine__(pos=pos, depth=depth, nodes=move_nodes, time=None,
                                                      mate=mate)
             try:
                 total_nodes += info["nodes"]
+                lastNps = info["nps"]
+                pv = info["pv"]
+                pv = pv[:MAX_MOVES]
             except KeyError:
-                stop_search(True, True)
-                continue
-                
-            lastNps = info["nps"]
-            pv = info["pv"]
-            pv = pv[:MAX_MOVES]
+                pass
             
             if move not in rootMovesPv.keys():
                 rootMovesPv[move] = [move]
@@ -246,7 +256,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH, depth: int = 
             if depth not in rootMovesDepth.keys():
                 rootMovesDepth[move] = depth
             
-            value = Value(info["score"], rootStm)
+            if not IS_GAME_OVER:
+                value = Value(info["score"], rootStm)
             
             # update rootMovesEval
             rootMovesEval[move] = value

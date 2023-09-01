@@ -4,6 +4,14 @@ import chess.engine
 import engine_utils as utils
 
 
+# Constants
+VALUE_INFINITE = 999999
+VALUE_NONE = 9999999
+VALUE_MATE = 100000
+VALUE_DRAW = 0
+MAX_DEPTH = 256
+
+
 class Value:
     """Stores a value in centipawns.
      If `pov` is provided, then it will always be from the perspective of `pov`,
@@ -12,20 +20,20 @@ class Value:
     value = None
     pov = None
     
-    def __init__(self, value, pov=None):
+    def __init__(self, value=VALUE_NONE, pov=None):
         if type(value) == int:
             self.value = value
         elif type(value) == chess.engine.PovScore and pov is None:
-            self.value = value.relative.score(mate_score=100000)
+            self.value = value.relative.score(mate_score=VALUE_MATE)
         elif type(value) == chess.engine.PovScore and pov is not None:
-            self.value = value.white().score(mate_score=100000)
+            self.value = value.white().score(mate_score=VALUE_MATE)
             if pov == chess.BLACK:
                 self.value = -self.value
             self.pov = pov
         elif type(value) == chess.engine.Score:
-            self.value = value.score(mate_score=100000)
+            self.value = value.score(mate_score=VALUE_MATE)
         elif type(value) == chess.engine.Cp:
-            self.value = value.score(mate_score=100000)
+            self.value = value.score(mate_score=VALUE_MATE)
         self.pov = pov
     
     def __int__(self):
@@ -108,8 +116,3 @@ class Value:
 
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
-
-
-# Constants
-VALUE_INFINITE = 999999
-MAX_DEPTH = 256

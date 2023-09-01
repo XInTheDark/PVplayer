@@ -173,6 +173,9 @@ def handle_command(command: str):
         except Exception as e:
             printf(f"Failed to set option: '{name}'. Error: {e}")
     
+    elif command == "d":
+        printf(pos.fen())
+        
     else:
         printf(f"Unknown command: '{command}'.")
         return
