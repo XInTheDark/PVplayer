@@ -137,9 +137,7 @@ class Option:
                    f"min {self.min_value} max {self.max_value} var {' '.join(self.choices)}"
 
 
-"""
---------------------
-"""
+""" -------------------- """
 
 
 # Option specific functions
@@ -148,12 +146,18 @@ def on_engine_param_change():
     from engine_engine import setoptions_engine
     setoptions_engine()
 
+def on_max_depth_change():
+    """Called when the max depth is changed."""
+    import engine_search_h
+    engine_search_h.MAX_DEPTH = option("MAX_DEPTH")
+
 
 # UCI Options
 options = {
     "ENGINE_PATH": Option.String("ENGINE_PATH", "stockfish"),
     "MAX_MOVES": Option.Spin("MAX_MOVES", 2, 1, 100),
     "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1 << 32, ["auto"]),
+    "MAX_DEPTH": Option.Spin("MAX_DEPTH", 256, 64, 1 << 16, on_max_depth_change),
     "debug": Option.Check("debug", False),
     
     "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),

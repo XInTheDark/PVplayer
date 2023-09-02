@@ -102,7 +102,7 @@ def handle_command(command: str):
         fen = fen_from_str(s)[0]
         pos = chess.Board(fen)
     elif command.startswith("go"):
-        MAX_ITERS = MAX_DEPTH
+        MAX_ITERS = MAX_DEPTH()
         
         if command.strip() == "go":
             MAX_ITERS = 10
@@ -125,7 +125,7 @@ def handle_command(command: str):
             MAX_ITERS = int(command.split(" ")[2])
         
         if has_arg and keyword == "infinite":
-            MAX_ITERS = MAX_DEPTH
+            MAX_ITERS = MAX_DEPTH()
         
         if has_arg and ("wtime" in args or "btime" in args):
             wtime, btime, winc, binc = process_time(args)
