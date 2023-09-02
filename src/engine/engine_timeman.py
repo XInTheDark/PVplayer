@@ -50,14 +50,12 @@ class Time:
         optExtra = utils.clamp(1.0 + 0.4 * math.log10(600 * self.inc[us] / self.time[us]), 1.0, 1.25) \
             if self.inc[us] > 0 else 0.8
         
-        # Use more time at start of game
-        startExtra = 1 + (16 - ply) * 0.15 if ply < 16 else 1.0
-        
         optScale = min((0.88 + ply / 116.4) / 50,
-                       0.88 * self.time[us] / timeLeft) * optExtra * startExtra
-        maxScale = 6.3
+                       0.88 * self.time[us] / timeLeft) * optExtra
+        maxScale = min(3.0 + 0.05 * ply, 6.5)
         
-        # Never use more than 80% of the available time for this move
+        # Never use more than x% of the available time for this move (scale based on ply)
         self.optTime = max(1, int(optScale * timeLeft))
-        self.maxTime = int(min(0.8 * self.time[us] - overhead, maxScale * self.optTime))
+        maxTimePercent = min(0.70 + 0.001 * ply, 0.90)
+        self.maxTime = int(min(maxTimePercent * self.time[us] - overhead, maxScale * self.optTime))
         self.optTime = min(self.optTime, self.maxTime)  # optTime <= maxTime
