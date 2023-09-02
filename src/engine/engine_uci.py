@@ -257,24 +257,21 @@ def preprocess(s: str):
 
 
 def engine_name_uci():
+    text = "PVengine"
     if ENGINE_VERSION:
-        return f"PVengine {ENGINE_VERSION}"
+        text = f"PVengine {ENGINE_VERSION}"
     
     git_hash = os.popen("git rev-parse --short=8 HEAD").read().strip()
-    date = os.popen("git log -1 --format=%cd --date=format:%Y%m%d").read().strip()
     if 'fatal:' in git_hash or git_hash == "":
         git_hash = ""
-    if 'fatal:' in date or date == "":
-        date = ""
     
-    if git_hash and date:
-        return f"PVengine dev-{git_hash}-{date}"
-    elif git_hash:
-        return f"PVengine dev-{git_hash}"
-    elif date:
-        return f"PVengine dev-{date}"
+    if git_hash:
+        if ENGINE_VERSION:
+            return f"{text}-{git_hash}"
+        else:
+            return f"PVengine dev-{git_hash}"
     
-    return f"PVengine"
+    return text
 
 
 @atexit.register
