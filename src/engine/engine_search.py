@@ -110,6 +110,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
     prevBestValue = rootScore
     prevBestMove = rootBestMove
     prevRecalcIter = -1
+    recalcIterCount = 0
     
     extraTimeIter = 0  # the iteration where we start using extra time
     
@@ -313,8 +314,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
         
         # Allow re-calculation of move PVs
         if (rootMovesSize / len(rootMoves) <= 0.2 or
-            (bestValue - prevBestValue <= -(25 + i / 2) or abs(bestValue - rootScore) > 100)) \
-                and i - prevRecalcIter >= 5:
+            (bestValue - prevBestValue <= -(25 + i / 2) or bestValue - rootScore <= -(50 + i))) \
+                and i - prevRecalcIter >= 5 + 2 * recalcIterCount:
             for m in rootMovesPv.keys():
                 # Delete the end of the PV, depending on how promising the move is.
                 # The more promising it is, the more we delete to allow more accurate calculation.
@@ -345,6 +346,7 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
             prevBestMove = bestMove
             bestValue = Value(-VALUE_INFINITE, rootStm)
             prevRecalcIter = i
+            recalcIterCount += 1
         
         i += 1
     
