@@ -312,8 +312,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
                 rootMovesExtraNodes[bestMove] *= 1.25
         
         # Allow re-calculation of move PVs
-        if (rootMovesSize / len(rootMoves) < 0.2 or \
-            (abs(bestValue - prevBestValue) > 50 or abs(bestValue - rootScore) > 100)) \
+        if (rootMovesSize / len(rootMoves) <= 0.2 or
+            (bestValue - prevBestValue <= -(25 + i / 2) or abs(bestValue - rootScore) > 100)) \
                 and i - prevRecalcIter >= 5:
             for m in rootMovesPv.keys():
                 # Delete the end of the PV, depending on how promising the move is.
