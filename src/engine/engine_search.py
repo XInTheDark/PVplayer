@@ -138,11 +138,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
                 return
         
         # Increase default_nodes as iteration increases
-        default_nodes *= 1 + 0.0025 * i
+        default_nodes *= 1.0 + max(0.0, (0.0025 - 0.000033 * i) * i)
         default_nodes = min(default_nodes, 10 * setNodes(option("Nodes"), i))  # cap at 10x default
-        
-        # Recalculate default_nodes
-        default_nodes = setNodes(option("Nodes"), i)
+        if option("debug"):
+            print(f"info string default_nodes: {default_nodes}")
 
         # Use more time for this iteration if bestMove is unstable
         if bestMoveChanges > 0:
@@ -234,10 +233,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
             pv = []
             
             # Pre-handling of checkmate, stalemate, draw, etc.
-            IS_GAME_OVER = pos.is_game_over(claim_draw=True)
-            OUTCOME = pos.outcome(claim_draw=True)
+            IS_GAME_OVER = pos.is_game_over()
+            OUTCOME = pos.outcome()
             if IS_GAME_OVER:
-                if OUTCOME.winner is None or pos.is_repetition():
+                if OUTCOME.winner is None:
                     value = Value(VALUE_DRAW)
                 else:
                     value = Value(VALUE_MATE, OUTCOME.winner)
@@ -338,7 +337,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
                 # update position
                 rootMovesPos[m] = utils.push_pv(rootPos.copy(), rootMovesPv[m])
             
-            # Restart the search
+            # Restart the search, with increased default_nodes
+            default_nodes *= 1.5
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
             prevBestValue = bestValue
@@ -414,6 +414,8 @@ def calc_nodes(move: chess.Move, bestValue: Value, i: int, default_nodes: int, p
     
     if move in rootMovesExtraNodes.keys():
         scale *= rootMovesExtraNodes[move]
+    
+    scale = clamp(scale, 0.01, 10.0)  # cap max scale just in case
     
     return int(default_nodes * scale)
 
