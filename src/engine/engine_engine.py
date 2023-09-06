@@ -28,7 +28,10 @@ def setoptions_engine():
         "Hash": option("Hash"),
     }
     for name, value in engine_options.items():
-        engine.configure({name: value})
+        try:
+            engine.configure({name: value})
+        except:
+            pass  # sometimes there may be unsupported options
 
 
 def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
