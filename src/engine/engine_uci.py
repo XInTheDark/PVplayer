@@ -174,7 +174,9 @@ def handle_command(command: str):
             printf(f"Failed to set option: '{name}'. Error: {e}")
     
     elif command == "d":
-        printf(pos.fen())
+        printf(pos.__str__() + "\n")
+        printf(f"FEN: {pos.fen()}")
+        printf(f"Checkers: {','.join([chess.square_name(sq) for sq in pos.checkers()])}")
         
     else:
         printf(f"Unknown command: '{command}'.")

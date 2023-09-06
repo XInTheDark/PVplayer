@@ -64,12 +64,17 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
     rootMoves = list(rootPos.legal_moves)
     rootMovesSize = len(list(rootMoves))
     
+    # Handle illegal moves
+    if rootMovesSize == 0 or not rootPos.is_valid():
+        printf("bestmove (none)")
+        IS_SEARCHING = False
+        return
+    
     # If we likely don't have enough time to search all moves, only use root engine eval
     if useTimeMan:
         # Special case: When we are under time control, and only one legal move, return immediately
-        if rootMovesSize <= 1:
-            # if we have no legal moves, return none
-            bestMove = rootMoves[0] if rootMovesSize == 1 else "(none)"
+        if rootMovesSize == 1:
+            bestMove = rootMoves[0]
             printf(f"info depth 0 nodes 0 time 0 pv {bestMove}")
             printf(f"bestmove {bestMove}")
             IS_SEARCHING = False
