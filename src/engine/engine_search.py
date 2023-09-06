@@ -66,6 +66,15 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
     
     # If we likely don't have enough time to search all moves, only use root engine eval
     if useTimeMan:
+        # Special case: When we are under time control, and only one legal move, return immediately
+        if rootMovesSize <= 1:
+            # if we have no legal moves, return none
+            bestMove = rootMoves[0] if rootMovesSize == 1 else "(none)"
+            printf(f"info depth 0 nodes 0 time 0 pv {bestMove}")
+            printf(f"bestmove {bestMove}")
+            IS_SEARCHING = False
+            return
+        
         if rootMovesSize * default_nodes > optTime / 1000 * lastNps:
             info: chess.engine.InfoDict = __engine__(pos=rootPos, time=optTime / 1000)
             score = Value(info["score"])
@@ -321,7 +330,8 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
                 rootMovesExtraNodes[bestMove] *= 1.25
         
         # Allow re-calculation of move PVs
-        if (rootMovesSize / len(rootMoves) <= 0.2 or
+        if (rootMovesSize <= 1 and i - prevRecalcIter >= recalcIterCount - 1) or \
+            (rootMovesSize / len(rootMoves) <= 0.2 or
             (bestValue - prevBestValue <= -(25 + i / 2) or bestValue - rootScore <= -(50 + i))) \
                 and i - prevRecalcIter >= 5 + 2 * recalcIterCount:
             for m in rootMovesPv.keys():
