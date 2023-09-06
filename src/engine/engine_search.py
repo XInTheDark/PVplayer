@@ -82,17 +82,25 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
             IS_SEARCHING = False
             return
     
-    info: chess.engine.InfoDict = __engine__(pos=rootPos, depth=depth, nodes=default_nodes, time=None,
-                                             mate=mate)
+    info: chess.engine.InfoDict
+    if option("Nodes") != "auto":
+        info = __engine__(pos=rootPos, depth=depth, nodes=default_nodes, time=None,
+                                                mate=mate)
+    else:
+        info = __engine__(pos=rootPos, depth=depth, nodes=None, time=1.0,
+                                                mate=mate)
+        
     
     rootScore = Value(info["score"])
     rootBestMove = info["pv"][0]
     rootPv = info["pv"]
     total_nodes += info["nodes"]
+    lastNps = info["nps"]
     
     printf(
-        f"info depth 0 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {info['nps']} "
-        f"pv {utils.pv_to_uci(rootPv)}")
+        f"info depth 0 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {lastNps} "
+        f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(rootPv)}")
+    
     rootStm = rootPos.turn
     
     # initialise dictionary for current position after each root move

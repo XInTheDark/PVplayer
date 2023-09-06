@@ -32,7 +32,7 @@ def setoptions_engine():
 
 
 def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
-               time: int = None, mate: int = None):
+               time: float = None, mate: int = None):
     """
     fen: FEN string
     depth: depth to search to
