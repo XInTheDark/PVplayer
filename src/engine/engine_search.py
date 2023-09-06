@@ -437,8 +437,9 @@ def setNodes(v, i: int):
         return v
     else:
         assert v == 'auto'
-        div = 5.0 - math.log10(option("Threads")) - 2.5 * math.log10(i)
-        div = clamp(div, 0.25, 5.0)
+        scale = (1000 - option("Nodes scale")) / 100.0
+        div = scale - math.log10(option("Threads")) - 2.0 * math.log10(i)
+        div = clamp(div, 0.10, 10.0)
         return int(lastNps / div)
 
 

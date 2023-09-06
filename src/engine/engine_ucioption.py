@@ -157,6 +157,7 @@ options = {
     "ENGINE_PATH": Option.String("ENGINE_PATH", "stockfish"),
     "MAX_MOVES": Option.Spin("MAX_MOVES", 2, 1, 100),
     "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1 << 32, ["auto"]),
+    "Nodes scale": Option.Spin("Nodes scale", 500, 0, 1000),
     "MAX_DEPTH": Option.Spin("MAX_DEPTH", 256, 64, 1 << 16, on_max_depth_change),
     "debug": Option.Check("debug", False),
     
