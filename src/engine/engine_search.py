@@ -430,14 +430,15 @@ def calc_nodes(move: chess.Move, bestValue: Value, i: int, default_nodes: int, p
     
     # Use more nodes for the first few iterations (also important for accuracy in pruning)
     if i <= 3:
-        if not prevEval:
-            scale *= 1.5
-        else:
-            scoreDiff = max(bestValue - prevEval, 0)
-            scale *= clamp(1.5 - (scoreDiff / 250), 1.05, 1.4)
+        scale *= 1.5
+        
+    # based on score difference
+    if prevEval is not None:
+        scoreDiff = max(bestValue - prevEval, 0)
+        scale *= clamp(1.5 - (scoreDiff / 125.0), 0.8, 1.4)
     
     # promising
-    promisingScale = max(2.0 * math.log10( max(10 * promisingValue - 2, 0) ),
+    promisingScale = max(2.0 * math.log10( max(10 * promisingValue - 2, 1.0) ),
                          min(0.2 + i * 0.005, 0.75))
     scale *= promisingScale
     
