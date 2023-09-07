@@ -98,10 +98,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
     
     info: chess.engine.InfoDict
     if option("Nodes") != "auto":
-        info = __engine__(pos=rootPos, depth=depth, nodes=default_nodes, time=None,
+        info = __engine__(pos=rootPos, depth=None, nodes=default_nodes, time=None,
                                                 mate=mate)
     else:
-        info = __engine__(pos=rootPos, depth=depth, nodes=None, time=1.0,
+        info = __engine__(pos=rootPos, depth=None, nodes=None, time=1.0,
                                                 mate=mate)
         
     
@@ -456,7 +456,7 @@ def setNodes(v, i: int):
         return v
     else:
         assert v == 'auto'
-        scale = (1000 - option("Nodes scale")) / 100.0
+        scale = (1000 - option("Nodes scale")) / (75.0 + 0.5 * i)
         div = scale - math.log10(option("Threads")) - 2.0 * math.log10(i)
         div = clamp(div, 0.10, 10.0)
         return int(totalNps / div)
