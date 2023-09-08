@@ -277,6 +277,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                     rootMovesExtraNodes[move] = 1.1
                 else:
                     rootMovesExtraNodes[move] += 0.1
+                continue  # skip evaluating this move currently
             
             info: chess.engine.InfoDict = __engine__(pos=pos, depth=None, nodes=move_nodes, time=None,
                                                      mate=mate)
