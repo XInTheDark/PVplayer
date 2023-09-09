@@ -147,9 +147,12 @@ def on_engine_param_change():
     setoptions_engine()
 
 def on_max_depth_change():
-    """Called when the max depth is changed."""
     import engine_search_h
     engine_search_h.MAX_DEPTH = option("MAX_DEPTH")
+
+def on_max_horizon_change():
+    import engine_search_h
+    engine_search_h.MAX_HORIZON = option("MAX_HORIZON")
 
 
 # UCI Options
@@ -159,6 +162,7 @@ options = {
     "Nodes": Option.SpinOrCombo("Nodes", "auto", 0, 1 << 32, ["auto"]),
     "Nodes scale": Option.Spin("Nodes scale", 500, 0, 1000),
     "MAX_DEPTH": Option.Spin("MAX_DEPTH", 256, 64, 1 << 16, on_max_depth_change),
+    "MAX_HORIZON": Option.Spin("MAX_HORIZON", 30, 2, 1024, on_max_horizon_change),
     "debug": Option.Check("debug", False),
     
     "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),

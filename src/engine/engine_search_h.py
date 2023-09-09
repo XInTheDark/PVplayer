@@ -2,7 +2,7 @@ import chess
 import chess.engine
 
 import engine_utils as utils
-
+from engine_ucioption import option
 
 # Constants
 VALUE_INFINITE = 999999
@@ -10,6 +10,7 @@ VALUE_NONE = 9999999
 VALUE_MATE = 100000
 VALUE_DRAW = 0
 MAX_DEPTH = 256
+MAX_HORIZON = 30
 
 
 class Value:
@@ -122,5 +123,11 @@ class Value:
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
-def MAX_DEPTH():
+def GET_MAX_DEPTH():
     return MAX_DEPTH
+
+def GET_MAX_HORIZON():
+    return MAX_HORIZON
+
+def GET_MAX_MOVES():
+    return option("MAX_MOVES")

@@ -14,7 +14,7 @@ IS_SEARCHING = False
 totalNps = 1000000 * option("Threads")
 
 
-def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int = None, nodes: int = None, movetime: int = None,
+def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DEPTH(), depth: int = None, nodes: int = None, movetime: int = None,
            mate: int = None, timeman: Time = Time()):
     """
     Search a position by tracing the PV.
@@ -126,13 +126,15 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
     pruned_rootMoves = {}
     rootMovesExtraNodes = {}
     
+    nextIterRecalcMoves = []  # list of root moves that need to be recalculated next iter
+    
     bestValue = Value(-VALUE_INFINITE, rootStm)
     bestMove = None
     bestMoveChanges = 0
     prevBestValue = rootScore
     prevBestMove = rootBestMove
     prevRecalcIter = -1
-    recalcIterCount = 0
+    recalcCount = 0
     
     extraTimeIter = 0  # the iteration where we start using extra time
     
@@ -254,7 +256,10 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
             move_nodes = calc_nodes(move, bestValue, i, default_nodes, prevEval, (move == bestMove),
                                     rootMovesExtraNodes, promisingValue)
             value = Value()
-            pv = []
+            if move in rootMovesPv.keys():
+                pv = rootMovesPv[move]
+            else:
+                pv = [move]
             
             # Pre-handling of checkmate, stalemate, draw, etc.
             IS_GAME_OVER = pos.is_game_over()
@@ -265,21 +270,28 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
                 else:
                     value = Value(VALUE_MATE, OUTCOME.winner)
         
-        
+            # Before evaluating, first check if the max. move horizon has been reached
+            if len(pv) >= GET_MAX_HORIZON():
+                # If move horizon is reached, we give extra nodes to the move, and recalculate it later
+                if not move in rootMovesExtraNodes.keys():
+                    rootMovesExtraNodes[move] = 1.1
+                else:
+                    rootMovesExtraNodes[move] += 0.1
+                continue  # skip evaluating this move currently
+            
             info: chess.engine.InfoDict = __engine__(pos=pos, depth=None, nodes=move_nodes, time=None,
                                                      mate=mate)
+            
             try:
                 total_nodes += info["nodes"]
-                pv = info["pv"]
-                pv = pv[:MAX_MOVES]
+                new_pv = info["pv"]
+                new_pv = new_pv[:MAX_MOVES]
+                pv.extend(new_pv)
             except KeyError:
                 pass
             
-            if move not in rootMovesPv.keys():
-                rootMovesPv[move] = [move]
-                rootMovesPv[move].extend(pv)
-            else:
-                rootMovesPv[move].extend(pv)
+            # Update PV
+            rootMovesPv[move] = pv
             
             depth = info["depth"]
             if depth not in rootMovesDepth.keys():
@@ -334,14 +346,18 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
             if bestMove not in rootMovesExtraNodes.keys():
                 rootMovesExtraNodes[bestMove] = 1.2  # initial bonus multiplier
             else:
-                rootMovesExtraNodes[bestMove] *= 1.25
+                rootMovesExtraNodes[bestMove] += 0.1
         
         # Allow re-calculation of move PVs
-        if (rootMovesSize <= 1 and i - prevRecalcIter >= recalcIterCount - 1) or \
+        if (rootMovesSize <= 1 and i - prevRecalcIter >= recalcCount - 1) or \
             (rootMovesSize / len(rootMoves) <= 0.2 or
             (bestValue - prevBestValue <= -(25 + i / 2) or bestValue - rootScore <= -(50 + i))) \
-                and i - prevRecalcIter >= 5 + 2 * recalcIterCount:
-            for m in rootMovesPv.keys():
+                and i - prevRecalcIter >= 5 + 2 * recalcCount:
+            # Every move needs to be re-calculated
+            nextIterRecalcMoves = rootMoves.copy()
+        
+        if len(nextIterRecalcMoves) > 0:
+            for m in nextIterRecalcMoves:
                 # Delete the end of the PV, depending on how promising the move is.
                 # The more promising it is, the more we delete to allow more accurate calculation.
                 p = promising(m, rootMovesEval, rootMovesSize, i, (m == bestMove),
@@ -366,16 +382,16 @@ def search(rootPos: chess.Board, MAX_MOVES=5, MAX_ITERS=MAX_DEPTH(), depth: int 
                 rootMovesPos[m] = utils.push_pv(rootPos.copy(), rootMovesPv[m])
             
             # Restart the search, with increased default_nodes
-            default_nodes *= 1.5
+            default_nodes += int(totalNps * 0.10)
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
             prevBestValue = bestValue
             prevBestMove = bestMove
             bestValue = Value(-VALUE_INFINITE, rootStm)
             prevRecalcIter = i
-            recalcIterCount += 1
+            recalcCount += 1
         
-        i += 1
+        i += 1  # next iteration
     
     # After search is finished
     bestPv = rootMovesPv[bestMove]
