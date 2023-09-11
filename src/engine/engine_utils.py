@@ -3,6 +3,7 @@ import math
 import chess
 import chess.engine
 
+import engine_debug
 from engine_ucioption import *
 
 
@@ -86,4 +87,7 @@ def clamp(value, min_value, max_value):
 
 
 def printf(s: str):
-    print(s, flush=True)
+    if engine_debug.DEBUG_IS_ENABLED:
+        print(s, flush=True, file=engine_debug.DEBUG_LOG_FILE)
+    else:
+        print(s, flush=True)

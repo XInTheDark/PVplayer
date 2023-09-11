@@ -9,6 +9,7 @@ import atexit
 import os
 import sys
 import threading
+from datetime import datetime
 
 import chess.engine
 
@@ -17,6 +18,7 @@ from engine_engine import engine
 from engine_timeman import Time
 from engine_utils import *
 from engine_search_h import *
+import engine_debug
 
 # threads
 search_thread = None
@@ -54,6 +56,8 @@ def fen_from_str(s: str):
 
 
 def handle_command(command: str):
+    if engine_debug.DEBUG_IS_ENABLED:
+        printf(f"cmd @ {datetime.now().strftime('%H:%M:%S')}: {command}")
     global search_thread, pos, tm
     command = preprocess(command)
     if command == "":
