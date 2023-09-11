@@ -206,6 +206,10 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                 if extraTimeIter < i:  # true as long as we did not use extra time
                     STOP_SEARCH = OPTTIME = MAXTIME = False  # reset
                     
+                    # Use previous iteration's best move since this iteration isn't complete
+                    bestMove = prevBestMove
+                    bestValue = prevBestValue
+                    
                     try:
                         bestPv = rootMovesPv[bestMove]
                     except KeyError:
@@ -386,12 +390,12 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             default_nodes += int(totalNps * 0.10)
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
-            prevBestValue = bestValue
-            prevBestMove = bestMove
             bestValue = Value(-VALUE_INFINITE, rootStm)
             prevRecalcIter = i
             recalcCount += 1
-        
+
+        prevBestValue = bestValue
+        prevBestMove = bestMove
         # end of this iteration
     
     # After search is finished
