@@ -74,7 +74,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         # Special case: When we are under time control, and only one legal move, return immediately
         if rootMovesSize == 1:
             bestMove = rootMoves[0]
-            printf(f"info depth 0 nodes 0 time 0 pv {bestMove}")
+            printf(f"info depth 1 nodes 0 time 0 pv {bestMove}")
             printf(f"bestmove {bestMove}")
             IS_SEARCHING = False
             return
@@ -86,7 +86,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             bestMove = bestPv[0]
             
             printf(
-                f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
+                f"info depth 1 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
                 f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(bestPv)}")
             if len(bestPv) <= 1:
                 printf(f"bestmove {bestMove}")
@@ -111,7 +111,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     totalNps = info["nps"]
     
     printf(
-        f"info depth 0 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {totalNps} "
+        f"info depth 1 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {totalNps} "
         f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(rootPv)}")
     
     rootStm = rootPos.turn
@@ -138,6 +138,8 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     extraTimeIter = 0  # the iteration where we start using extra time
     
     while i <= MAX_ITERS:
+        i += 1  # the first iteration is the root, so start at depth 2
+        
         # Pre-iteration check:
         # If we estimate that this iteration will take too long,
         # Then we should stop searching in order to save time in timed games.
@@ -390,7 +392,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             prevRecalcIter = i
             recalcCount += 1
         
-        i += 1  # next iteration
+        # end of this iteration
     
     # After search is finished
     bestPv = rootMovesPv[bestMove]
