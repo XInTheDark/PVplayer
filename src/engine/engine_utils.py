@@ -89,5 +89,6 @@ def clamp(value, min_value, max_value):
 def printf(s: str):
     if engine_debug.DEBUG_IS_ENABLED:
         print(s, flush=True, file=engine_debug.DEBUG_LOG_FILE)
+        print(s, flush=True)
     else:
         print(s, flush=True)
