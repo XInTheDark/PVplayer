@@ -128,7 +128,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     nextIterRecalcMoves = []  # list of root moves that need to be recalculated next iter
     
     bestValue = Value(-VALUE_INFINITE, rootStm)
-    bestMove = None
+    bestMove = rootBestMove  # in case we have no time to search, at least return a move
     bestMoveChanges = 0
     prevBestValue = rootScore
     prevBestMove = rootBestMove

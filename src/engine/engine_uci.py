@@ -77,7 +77,7 @@ def handle_command(command: str):
         pos = chess.Board()
     elif command.startswith("position startpos moves"):
         try:
-            moves = command.split("position startpos moves ")[1].split(" ")
+            moves = command.split(" ")[3:]
         except IndexError:
             moves = []
         for move in moves:
