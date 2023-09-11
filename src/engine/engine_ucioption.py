@@ -133,7 +133,8 @@ class Option:
                 self.func()
         
         def __str__(self):
-            return f"option name {self.name} type spin_or_combo default {self.default} " \
+            # We register this as type string in order to please UCI interfaces.
+            return f"option name {self.name} type string default {self.default} " \
                    f"min {self.min_value} max {self.max_value} var {' '.join(self.choices)}"
 
 
