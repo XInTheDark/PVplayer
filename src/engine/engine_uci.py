@@ -1,7 +1,7 @@
 """
 Special thanks to PyFish for most of the UCI code.
 """
-ENGINE_VERSION = "v4.0.0"
+ENGINE_VERSION = "v4.0.1"
 ENGINE_NAME = "PVengine"
 ENGINE_AUTHOR = "J Muzhen"
 

@@ -120,6 +120,32 @@ class Value:
         return Value(self.value, pov)
 
 
+class RunningAverage:
+    max_count = 1024
+    total = 0
+    count = 0
+    earliest = 0
+    
+    def __init__(self, max_count=1024):
+        self.max_count = max_count
+    
+    def add(self, value):
+        self.total += value
+        self.count += 1
+        if self.count > self.max_count:
+            self.total -= self.earliest
+            self.count -= 1
+    
+    def value(self):
+        return self.total / self.count if self.count > 0 else 0
+
+    def __str__(self):
+        return str(self.value())
+    
+    def __int__(self):
+        return int(self.value())
+    
+    
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
