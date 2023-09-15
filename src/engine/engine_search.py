@@ -356,10 +356,10 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                 rootMovesExtraNodes[bestMove] += 0.1
         
         # Allow re-calculation of move PVs
-        if (rootMovesSize <= 1 and i - prevRecalcIter >= recalcCount - 1) or \
-            (rootMovesSize / len(rootMoves) <= 0.2 or
-            (bestValue - prevBestValue <= -(25 + i / 2) or bestValue - rootScore <= -(50 + i))) \
-                and i - prevRecalcIter >= 5 + 2 * recalcCount:
+        if ( (rootMovesSize <= 1 and i - prevRecalcIter >= recalcCount - 1) or
+             rootMovesSize / len(rootMoves) <= max(0.02, 0.2 - recalcCount * 0.02) or
+             bestValue - prevBestValue <= -(25 + i / 2) or (i <= 10 and bestValue - rootScore <= -(50 + i)) ) \
+            and i - prevRecalcIter >= 5 + 2 * recalcCount:
             # Every move needs to be re-calculated
             nextIterRecalcMoves = rootMoves.copy()
         
@@ -395,6 +395,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             bestValue = Value(-VALUE_INFINITE, rootStm)
             prevRecalcIter = i
             recalcCount += 1
+            nextIterRecalcMoves = []
 
         prevBestValue = bestValue
         prevBestMove = bestMove
