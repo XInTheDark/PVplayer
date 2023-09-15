@@ -59,3 +59,6 @@ class Time:
         maxTimePercent = min(0.70 + 0.001 * ply, 0.90)
         self.maxTime = int(min(maxTimePercent * self.time[us] - overhead, maxScale * self.optTime))
         self.optTime = min(self.optTime, self.maxTime)  # optTime <= maxTime
+    
+    def to_Limit(self):
+        return self.wtime / 1000, self.btime / 1000, self.winc / 1000, self.binc / 1000

@@ -2,6 +2,7 @@ import chess
 import chess.engine
 
 from engine_ucioption import *
+from engine_timeman import Time
 
 engine: chess.engine.SimpleEngine = None
 
@@ -35,7 +36,7 @@ def setoptions_engine():
 
 
 def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
-               time: float = None, mate: int = None):
+               movetime: float = None, mate: int = None, timeMan: Time = None):
     """
     fen: FEN string
     depth: depth to search to
@@ -45,7 +46,14 @@ def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
     global engine
     
     # Create a new limit
-    limit = chess.engine.Limit(depth=depth, nodes=nodes, time=time, mate=mate)
+    if timeMan and movetime:
+        timeMan = None  # movetime takes precedence
+        
+    if timeMan:
+        wtime, btime, winc, binc = timeMan.to_Limit()
+        limit = chess.engine.Limit(white_clock=wtime, black_clock=btime, white_inc=winc, black_inc=binc)
+    else:
+        limit = chess.engine.Limit(depth=depth, nodes=nodes, time=movetime, mate=mate)
     
     # Evaluate with engine
     result = engine.analyse(pos, limit)

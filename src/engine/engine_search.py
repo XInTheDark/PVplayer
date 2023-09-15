@@ -80,7 +80,8 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             return
         
         if rootMovesSize * default_nodes > optTime / 1000 * Nps():
-            info: chess.engine.InfoDict = __engine__(pos=rootPos, time=optTime / 1000)
+            # use the engine's timeman
+            info: chess.engine.InfoDict = __engine__(pos=rootPos, timeMan=timeman)
             score = Value(info["score"])
             bestPv = info["pv"]
             bestMove = bestPv[0]
@@ -97,11 +98,9 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     
     info: chess.engine.InfoDict
     if option("Nodes") != "auto":
-        info = __engine__(pos=rootPos, depth=None, nodes=default_nodes, time=None,
-                                                mate=mate)
+        info = __engine__(pos=rootPos, nodes=default_nodes)
     else:
-        info = __engine__(pos=rootPos, depth=None, nodes=None, time=1.0,
-                                                mate=mate)
+        info = __engine__(pos=rootPos, movetime=1.0)
         
     
     rootScore = Value(info["score"])
@@ -282,8 +281,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                     rootMovesExtraNodes[move] += 0.1
                 continue  # skip evaluating this move currently
             
-            info: chess.engine.InfoDict = __engine__(pos=pos, depth=None, nodes=move_nodes, time=None,
-                                                     mate=mate)
+            info: chess.engine.InfoDict = __engine__(pos=pos, nodes=move_nodes)
             
             new_pv = None
             try:
