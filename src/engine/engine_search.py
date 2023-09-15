@@ -14,8 +14,9 @@ IS_SEARCHING = False
 npsAverage = RunningAverage(max_count=5)
 
 
-def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DEPTH(), depth: int = None, nodes: int = None, movetime: int = None,
-           mate: int = None, timeman: Time = Time()):
+def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DEPTH(),
+           depth: int = None, nodes: int = None, movetime: int = None,
+           timeman: Time = Time()):
     """
     Search a position by tracing the PV.
     
