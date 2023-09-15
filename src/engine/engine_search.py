@@ -11,7 +11,7 @@ from engine_utils import printf
 STOP_SEARCH = OPTTIME = MAXTIME = False
 IS_SEARCHING = False
 
-totalNps = 1000000 * option("Threads")
+npsAverage = RunningAverage(max_count=5)
 
 
 def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DEPTH(), depth: int = None, nodes: int = None, movetime: int = None,
@@ -24,7 +24,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     param time: Maximum time *per move*
     """
     
-    global STOP_SEARCH, totalNps, IS_SEARCHING
+    global STOP_SEARCH, npsAverage, IS_SEARCHING
     global OPTTIME, MAXTIME
     
     STOP_SEARCH = False
@@ -74,19 +74,19 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         # Special case: When we are under time control, and only one legal move, return immediately
         if rootMovesSize == 1:
             bestMove = rootMoves[0]
-            printf(f"info depth 1 nodes 0 time 0 pv {bestMove}")
+            printf(f"info depth 0 nodes 0 time 0 pv {bestMove}")
             printf(f"bestmove {bestMove}")
             IS_SEARCHING = False
             return
         
-        if rootMovesSize * default_nodes > optTime / 1000 * totalNps:
+        if rootMovesSize * default_nodes > optTime / 1000 * Nps():
             info: chess.engine.InfoDict = __engine__(pos=rootPos, time=optTime / 1000)
             score = Value(info["score"])
             bestPv = info["pv"]
             bestMove = bestPv[0]
             
             printf(
-                f"info depth 1 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
+                f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
                 f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(bestPv)}")
             if len(bestPv) <= 1:
                 printf(f"bestmove {bestMove}")
@@ -108,10 +108,10 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     rootBestMove = info["pv"][0]
     rootPv = info["pv"]
     total_nodes += info["nodes"]
-    totalNps = info["nps"]
+    npsAverage.add(info["nps"])
     
     printf(
-        f"info depth 1 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {totalNps} "
+        f"info depth 0 seldepth {info['depth']} score cp {rootScore.__uci_str__()} nodes {total_nodes} nps {Nps()} "
         f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(rootPv)}")
     
     rootStm = rootPos.turn
@@ -138,15 +138,13 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     extraTimeIter = 0  # the iteration where we start using extra time
     
     while i <= MAX_ITERS:
-        i += 1  # the first iteration is the root, so start at depth 2
-        
         # Pre-iteration check:
         # If we estimate that this iteration will take too long,
         # Then we should stop searching in order to save time in timed games.
         if useTimeMan:
             # Estimate total nodes based on rootMovesSize
             # Be relatively more aggressive as we can always stop later
-            if rootMovesSize * default_nodes > optTimeLeft / 1000 * totalNps * 2:
+            if rootMovesSize * default_nodes > optTimeLeft / 1000 * Nps() * 2:
                 if not bestMove:
                     bestMove = rootBestMove
                 try:
@@ -198,7 +196,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                 if useTimeMan:
                     if not extraTimeIter and OPTTIME and not MAXTIME:
                         move_i = rootMoves.index(move) + 1
-                        if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * totalNps:
+                        if (rootMovesSize - move_i) * default_nodes * 1.2 < maxTime / 1000 * Nps():
                             if option("debug"):
                                 printf(f"info string Timeman: Extra time")
                                 extraTimeIter = i
@@ -287,6 +285,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             info: chess.engine.InfoDict = __engine__(pos=pos, depth=None, nodes=move_nodes, time=None,
                                                      mate=mate)
             
+            new_pv = None
             try:
                 total_nodes += info["nodes"]
                 new_pv = info["pv"]
@@ -314,7 +313,8 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             if option("debug"):
                 printf(f"info string Iteration {i} | Move: {move} | Eval: {value} | POV: {value.to_pov(rootStm)}")
             
-            rootMovesPos[move] = utils.push_pv(pos, pv, info)
+            if new_pv:
+                rootMovesPos[move] = utils.push_pv(pos, new_pv, info)
             
             if value > bestValue:
                 if move != bestMove:
@@ -322,14 +322,16 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                 bestValue = value
                 bestMove = move
         
-        # printf(f"Iteration {i} | Best move: {bestMove} | Eval: {bestValue} | Depth: {depth}")
-        
         # proper UCI formatting
         time_taken = time_now() - root_time
-        totalNps = int(total_nodes / time_taken)  # update nps
+        try:
+            if info["nps"]:
+                npsAverage.add(info["nps"])
+        except Exception:
+            pass
         
         printf(
-            f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {totalNps} "
+            f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {Nps()} "
             f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
         
         # Update pruned moves after we finish searching all root moves
@@ -387,7 +389,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
                 rootMovesPos[m] = utils.push_pv(rootPos.copy(), rootMovesPv[m])
             
             # Restart the search, with increased default_nodes
-            default_nodes += int(totalNps * 0.10)
+            default_nodes += int(Nps() * 0.10)
             rootMovesSize = len(list(rootMoves))
             pruned_rootMoves = {}
             bestValue = Value(-VALUE_INFINITE, rootStm)
@@ -396,7 +398,9 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
 
         prevBestValue = bestValue
         prevBestMove = bestMove
+        
         # end of this iteration
+        i += 1
     
     # After search is finished
     bestPv = rootMovesPv[bestMove]
@@ -480,7 +484,7 @@ def setNodes(v, i: int):
         scale = (1000 - option("Nodes scale")) / (75.0 + 0.5 * i)
         div = scale - math.log10(option("Threads")) - 2.0 * math.log10(i)
         div = clamp(div, 0.10, 10.0)
-        return int(totalNps / div)
+        return int(Nps() / div)
 
 
 def promising(move: chess.Move, rootMovesEval: dict, rootMovesSize: int, i: int, is_best: bool,
@@ -528,3 +532,8 @@ def engine_is_alive():
         return True
     except Exception:
         return False
+
+
+def Nps():
+    nps = int(npsAverage.value())
+    return nps

@@ -6,7 +6,8 @@ import chess.engine
 from engine_ucioption import *
 
 
-def push_pv(board: chess.Board, pv, info=None, is_tb=False):
+def push_pv(pos: chess.Board, pv, info=None, is_tb=False):
+    board = pos.copy()
     if type(pv) == str:
         pv = pv.split('pv')[-1]
         pv = pv.split()
