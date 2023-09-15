@@ -404,7 +404,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     
     # After search is finished
     bestPv = rootMovesPv[bestMove]
-    if len(bestPv) == 1:
+    if len(bestPv) <= 1:
         printf(f"bestmove {bestMove}")
     else:
         printf(f"bestmove {bestMove} ponder {bestPv[1]}")
