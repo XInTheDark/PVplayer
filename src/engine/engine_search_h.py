@@ -138,6 +138,11 @@ class RunningAverage:
     
     def value(self):
         return self.total / self.count if self.count > 0 else 0
+    
+    def clear(self):
+        self.total = 0
+        self.count = 0
+        self.earliest = 0
 
     def __str__(self):
         return str(self.value())
