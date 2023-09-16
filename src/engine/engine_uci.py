@@ -8,6 +8,7 @@ ENGINE_AUTHOR = "J Muzhen"
 import atexit
 import os
 import sys
+import asyncio
 import threading
 
 import chess.engine
@@ -53,7 +54,7 @@ def fen_from_str(s: str):
     return [fen, moves]
 
 
-def handle_command(command: str):
+async def handle_command(command: str):
     global search_thread, pos, tm
     command = preprocess(command)
     if command == "":
@@ -184,7 +185,7 @@ def handle_command(command: str):
         return
 
 
-def handle_commands():
+async def handle_commands():
     global search_thread, pos, tm
     pos = chess.Board()
     tm = Time()
@@ -192,13 +193,15 @@ def handle_commands():
         # split when there is a newline
         lst = ' '.join(sys.argv[1:]).split("\n")
         for command in lst:
-            handle_command(command)
+            await handle_command(command)
+        while engine_search.IS_SEARCHING:
+            continue
         os._exit(0)
     
     while True:
         try:
             command = preprocess(sys.stdin.readline())
-            handle_command(command)
+            await handle_command(command)
         except Exception:
             continue
 
@@ -219,7 +222,7 @@ def uci():
     printf(f"{ENGINE_NAME} by {ENGINE_AUTHOR}")
     
     # Create a thread for handling UCI input
-    uci_thread = threading.Thread(target=handle_commands)
+    uci_thread = threading.Thread(target=asyncio.run, args=(handle_commands(),))
     uci_thread.start()
 
 
