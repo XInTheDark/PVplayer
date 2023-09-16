@@ -193,6 +193,8 @@ def handle_commands():
         lst = ' '.join(sys.argv[1:]).split("\n")
         for command in lst:
             handle_command(command)
+        while engine_search.IS_SEARCHING:
+            continue
         os._exit(0)
     
     while True:
