@@ -4,6 +4,8 @@ import chess.engine
 import engine_utils as utils
 from engine_ucioption import option
 
+from collections import deque
+
 # Constants
 VALUE_INFINITE = 999999
 VALUE_NONE = 9999999
@@ -124,17 +126,19 @@ class RunningAverage:
     max_count = 1024
     total = 0
     count = 0
-    earliest = 0
+    values = deque()
     
-    def __init__(self, max_count=1024):
+    def __init__(self, max_count: int = 1024):
+        assert max_count > 0
         self.max_count = max_count
     
     def add(self, value):
         self.total += value
         self.count += 1
         if self.count > self.max_count:
-            self.total -= self.earliest
+            self.total -= self.values.popleft()  # removes the oldest value
             self.count -= 1
+        self.values.append(value)
     
     def value(self):
         return self.total / self.count if self.count > 0 else 0
