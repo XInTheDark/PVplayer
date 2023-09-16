@@ -26,7 +26,7 @@ class Option:
             value = bool(value.lower())
             self.value = value
             if self.func:
-                self.func()
+                self.func(value)
         
         def __str__(self):
             return f"option name {self.name} type check default {self.default}"
@@ -49,7 +49,7 @@ class Option:
             
             self.value = value
             if self.func:
-                self.func()
+                self.func(value)
         
         def __str__(self):
             return f"option name {self.name} type spin default {self.default} min {self.min_value} max {self.max_value}"
@@ -69,7 +69,7 @@ class Option:
                 raise ValueError(f"Invalid choice: '{value}'")
             self.value = value
             if self.func:
-                self.func()
+                self.func(value)
         
         def __str__(self):
             return f"option name {self.name} type combo default {self.default} var {' '.join(self.choices)}"
@@ -83,7 +83,7 @@ class Option:
             self.func = func
         
         def set(self, value):
-            self.func()
+            self.func(value)
         
         def __str__(self):
             return f"option name {self.name} type button"
@@ -100,7 +100,7 @@ class Option:
         def set(self, value: str):
             self.value = value
             if self.func:
-                self.func()
+                self.func(value)
         
         def __str__(self):
             return f"option name {self.name} type string default {self.default}"
@@ -130,7 +130,7 @@ class Option:
                     return
                 self.value = value
             if self.func:
-                self.func()
+                self.func(value)
         
         def __str__(self):
             # We register this as type string in order to please UCI interfaces.
@@ -142,19 +142,39 @@ class Option:
 
 
 # Option specific functions
-def on_engine_param_change():
+def on_engine_param_change(unused):
     """Called when the engine parameters are changed."""
     from engine_engine import setoptions_engine
     setoptions_engine()
 
-def on_max_depth_change():
+def on_max_depth_change(unused):
     import engine_search_h
     engine_search_h.MAX_DEPTH = option("MAX_DEPTH")
 
-def on_max_horizon_change():
+def on_max_horizon_change(unused):
     import engine_search_h
     engine_search_h.MAX_HORIZON = option("MAX_HORIZON")
 
+def parse_engine_option_str(option_str):
+    """Format: setoption name {ADD_OPTION/REMOVE_OPTION} value {option_name} value {option_value}"""
+    # split by 'name', then get the part of {option_name} and {option_value}
+    # option_str here is just "{option_name} value {option_value}"
+    option_name = option_str.split("value")[0].strip()
+    option_value = option_str.split("value")[1].strip()
+    return option_name, option_value
+
+def on_add_engine_option(option_str):
+    """Called when an engine option is added."""
+    import engine_engine
+    option_name, option_value = parse_engine_option_str(option_str)
+    engine_engine.engine_options[option_name] = option_value
+    
+def on_remove_engine_option(option_str):
+    """Called when an engine option is removed."""
+    import engine_engine
+    option_name, _ = parse_engine_option_str(option_str)
+    del engine_engine.engine_options[option_name]
+    
 
 # UCI Options
 options = {
@@ -166,8 +186,13 @@ options = {
     "MAX_HORIZON": Option.Spin("MAX_HORIZON", 30, 2, 1024, on_max_horizon_change),
     "debug": Option.Check("debug", False),
     
+    # Default engine options
     "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),
     "Hash": Option.Spin("Hash", 256, 1, 1 << 25, func=on_engine_param_change),
+    
+    # Command to add/remove engine options
+    "ADD_OPTION": Option.String("ADD_OPTION", "", on_add_engine_option),
+    "REMOVE_OPTION": Option.String("REMOVE_OPTION", "", on_remove_engine_option),
     
     "Move Overhead": Option.Spin("Move Overhead", 100, 0, 5000),
 }

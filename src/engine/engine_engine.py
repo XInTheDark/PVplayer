@@ -5,7 +5,10 @@ from engine_ucioption import *
 from engine_timeman import Time
 
 engine: chess.engine.SimpleEngine = None
-
+engine_options = {
+    "Threads": option("Threads"),
+    "Hash": option("Hash"),
+}
 
 def init_engine():
     global engine
@@ -22,12 +25,13 @@ def init_engine():
 
 
 def setoptions_engine():
-    global engine
+    global engine, engine_options
     # UCI options
-    engine_options = {
-        "Threads": option("Threads"),
-        "Hash": option("Hash"),
-    }
+    
+    # Update default engine options
+    engine_options["Threads"] = option("Threads")
+    engine_options["Hash"] = option("Hash")
+    
     for name, value in engine_options.items():
         try:
             engine.configure({name: value})
