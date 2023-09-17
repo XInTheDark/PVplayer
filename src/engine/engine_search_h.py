@@ -153,7 +153,41 @@ class RunningAverage:
     
     def __int__(self):
         return int(self.value())
+
+
+class RunningWeightedAverage:
+    class WeightedValue:
+        value = 0
+        weight = 0
+        
+        def __init__(self, value, weight):
+            self.value = value
+            self.weight = weight
     
+    total = 0
+    total_weight = 0
+    
+    def __init__(self):
+        self.clear()
+    
+    def add(self, v: WeightedValue):
+        self.total += v.value * v.weight
+    
+    def value(self):
+        return self.total / self.total_weight if self.total_weight != 0 else 0
+    
+    def clear(self):
+        self.total = 0
+        self.total_weight = 0
+    
+    def __str__(self):
+        return str(self.value())
+    
+    def __int__(self):
+        return int(self.value())
+    
+    def __round__(self, n=None):
+        return round(self.value(), n)
     
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
