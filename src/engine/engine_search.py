@@ -80,7 +80,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             IS_SEARCHING = False
             return
         
-        if rootMovesSize * default_nodes > optTime / 1000 * Nps():
+        if rootMovesSize * default_nodes > maxTime / 1000 * Nps():
             # use the engine's timeman
             info: chess.engine.InfoDict = __engine__(pos=rootPos, timeMan=timeman)
             score = Value(info["score"])
