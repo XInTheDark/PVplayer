@@ -333,6 +333,9 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {Nps()} "
             f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
         
+        prevBestValue = bestValue
+        prevBestMove = bestMove
+        
         # Update pruned moves after we finish searching all root moves
         for move in rootMovesEval.keys():
             v = rootMovesEval[move]
@@ -395,9 +398,6 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             prevRecalcIter = i
             recalcCount += 1
             nextIterRecalcMoves = []
-
-        prevBestValue = bestValue
-        prevBestMove = bestMove
         
         # end of this iteration
         i += 1
