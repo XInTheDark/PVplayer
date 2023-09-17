@@ -58,8 +58,8 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     
     i = 1
     total_nodes = 0
-    default_nodes = setNodes(option("Nodes"), i)
     npsAverage.clear()
+    default_nodes = setNodes(option("Nodes"), i)
     
     rootMoves = list(rootPos.legal_moves)
     rootMovesSize = len(list(rootMoves))
