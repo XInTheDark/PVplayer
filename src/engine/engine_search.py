@@ -88,7 +88,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             bestMove = bestPv[0]
             
             printf(
-                f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} nps {info['nps']} "
+                f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} "
                 f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(bestPv)}")
             if len(bestPv) <= 1:
                 printf(f"bestmove {bestMove}")
