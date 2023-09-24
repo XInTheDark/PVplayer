@@ -189,6 +189,7 @@ options = {
     # Default engine options
     "Threads": Option.Spin("Threads", 1, 1, 1024, func=on_engine_param_change),
     "Hash": Option.Spin("Hash", 256, 1, 1 << 25, func=on_engine_param_change),
+    "MultiPV": Option.Spin("MultiPV", 1, 1, 500, func=None),
     
     # Command to add/remove engine options
     "ADD_OPTION": Option.String("ADD_OPTION", "", on_add_engine_option),
