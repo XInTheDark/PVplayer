@@ -125,7 +125,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     pruned_rootMoves = {}
     rootMovesExtraNodes = {}
     
-    nextIterRecalcMoves = []  # list of root moves that need to be recalculated next iter
+    nextIterRecalcMoves = set()  # list of root moves that need to be recalculated next iter
     
     bestValue = Value(-VALUE_INFINITE, rootStm)
     bestMove = rootBestMove  # in case we have no time to search, at least return a move
@@ -275,11 +275,14 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         
             # Before evaluating, first check if the max. move horizon has been reached
             if len(pv) >= GET_MAX_HORIZON():
-                # If move horizon is reached, we give extra nodes to the move, and recalculate it later
+                # If move horizon is reached, we give extra nodes to the move
                 if not move in rootMovesExtraNodes.keys():
                     rootMovesExtraNodes[move] = 1.1
                 else:
                     rootMovesExtraNodes[move] += 0.1
+                # And we recalculate this move later
+                nextIterRecalcMoves.add(move)
+                
                 continue  # skip evaluating this move currently
             
             info: chess.engine.InfoDict = __engine__(pos=pos, nodes=move_nodes)
@@ -363,7 +366,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
              bestValue - prevBestValue <= -(25 + i / 2) or (i <= 10 and bestValue - rootScore <= -(50 + i)) ) \
             and i - prevRecalcIter >= 5 + 2 * recalcCount:
             # Every move needs to be re-calculated
-            nextIterRecalcMoves = rootMoves.copy()
+            nextIterRecalcMoves = set(rootMoves)
         
         if len(nextIterRecalcMoves) > 0:
             for m in nextIterRecalcMoves:
@@ -397,7 +400,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             bestValue = Value(-VALUE_INFINITE, rootStm)
             prevRecalcIter = i
             recalcCount += 1
-            nextIterRecalcMoves = []
+            nextIterRecalcMoves.clear()
         
         # end of this iteration
         i += 1
