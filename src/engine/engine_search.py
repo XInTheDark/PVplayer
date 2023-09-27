@@ -43,7 +43,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     optTimeLeft = optTime
     maxTime = timeman.maxTime
         
-    useTimeMan = optTime > 0 or maxTime > 0
+    useTimeMan = optTime != 0 or maxTime != 0
     startTime = time_now()
     
     if optTime:
