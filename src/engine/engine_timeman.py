@@ -20,6 +20,7 @@ class Time:
     time: [int, int] = [0, 0]  # black (0), white (1)
     inc: [int, int] = [0, 0]
     
+    us: chess.Color = None
     optTime = maxTime = 0
     
     def __init__(self, wtime: int = 0, btime: int = 0, winc: int = 0, binc: int = 0):
@@ -38,6 +39,8 @@ class Time:
     
     def init(self, us: chess.Color, ply: int):
         """Much of the calculation algorithm is derived from Stockfish."""
+        self.us = us
+        
         if self.time[us] == 0:
             return
         
@@ -62,3 +65,9 @@ class Time:
     
     def to_Limit(self):
         return self.wtime / 1000, self.btime / 1000, self.winc / 1000, self.binc / 1000
+    
+    def useTimeMan(self):
+        if self.us is None:
+            return self.wtime > 0 or self.btime > 0
+        else:
+            return self.get_time(self.us) > 0 or self.optTime > 0 or self.maxTime > 0

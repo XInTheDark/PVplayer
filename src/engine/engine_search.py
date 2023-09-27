@@ -35,14 +35,15 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     root_time = last_output_time = time_now()
     
     # initialise timeman object
+    assert timeman is not None
     timeman.init(rootPos.turn, rootPos.ply())
+    if movetime:
+        timeman.optTime = timeman.maxTime = movetime
     optTime = timeman.optTime
     optTimeLeft = optTime
     maxTime = timeman.maxTime
-    if movetime:
-        optTime = maxTime = movetime
         
-    useTimeMan = optTime or maxTime
+    useTimeMan = optTime > 0 or maxTime > 0
     startTime = time_now()
     
     if optTime:

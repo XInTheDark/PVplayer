@@ -52,13 +52,20 @@ def __engine__(pos: chess.Board, depth: int = None, nodes: int = None,
     # Create a new limit
     if timeMan and movetime:
         timeMan = None  # movetime takes precedence
-        
-    if timeMan:
+    
+    useTimeMan = timeMan is not None and timeMan.useTimeMan()
+    useMoveTime = useTimeMan and timeMan.optTime == timeMan.maxTime
+    
+    limit = chess.engine.Limit(depth=depth, nodes=nodes)
+    
+    if useTimeMan and not useMoveTime:
         wtime, btime, winc, binc = timeMan.to_Limit()
         limit = chess.engine.Limit(white_clock=wtime, black_clock=btime, white_inc=winc, black_inc=binc)
-    else:
-        limit = chess.engine.Limit(depth=depth, nodes=nodes, time=movetime)
-    
+    elif movetime:
+        limit = chess.engine.Limit(time=movetime)
+    elif useMoveTime:
+        limit = chess.engine.Limit(time=timeMan.maxTime / 1000)
+        
     # Evaluate with engine
     result = engine.analyse(pos, limit)
     return result
