@@ -127,13 +127,14 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     rootMovesExtraNodes = {}
     
     nextIterRecalcMoves = set()  # list of root moves that need to be recalculated next iter
+    prevPvRecalcIter = -MAX_DEPTH
     
     bestValue = Value(-VALUE_INFINITE, rootStm)
     bestMove = rootBestMove  # in case we have no time to search, at least return a move
     bestMoveChanges = 0
     prevBestValue = rootScore
     prevBestMove = rootBestMove
-    prevRecalcIter = -1
+    prevRecalcIter = -MAX_DEPTH
     recalcCount = 0
     
     extraTimeIter = 0  # the iteration where we start using extra time
@@ -166,7 +167,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         default_nodes *= 1.0 + max(0.0, (0.0025 - 0.000033 * i) * i)
         default_nodes = min(default_nodes, 10 * setNodes(option("Nodes"), i))  # cap at 10x default
         if option("debug"):
-            print(f"info string default_nodes: {default_nodes}")
+            printf(f"info string default_nodes: {default_nodes}")
 
         # Use more time for this iteration if bestMove is unstable
         if bestMoveChanges > 0:
@@ -333,9 +334,14 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         except Exception:
             pass
         
-        printf(
-            f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {Nps()} "
-            f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
+        if i - prevPvRecalcIter > 2:
+            printf(
+                f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {Nps()} "
+                f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
+        else:
+            # if current or last iter's best move was recalculated, do not output unsafe info
+            printf(
+                f"info depth {i} seldepth {depth} nodes {total_nodes} nps {Nps()} time {int(time_taken * 1000)}")
         
         prevBestValue = bestValue
         prevBestMove = bestMove
@@ -401,6 +407,8 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             bestValue = Value(-VALUE_INFINITE, rootStm)
             prevRecalcIter = i
             recalcCount += 1
+            if bestMove in nextIterRecalcMoves:
+                prevPvRecalcIter = i
             nextIterRecalcMoves.clear()
         
         # end of this iteration
