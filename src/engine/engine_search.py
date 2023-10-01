@@ -11,7 +11,7 @@ from engine_utils import printf
 STOP_SEARCH = OPTTIME = MAXTIME = False
 IS_SEARCHING = False
 
-npsAverage = RunningAverage(max_count=5)
+npsAverage = RunningAverage(max_count=10, default_value=1000000 * option("Threads"))
 
 
 def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DEPTH(),
@@ -59,7 +59,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     
     i = 1
     total_nodes = 0
-    npsAverage.clear()
+    # npsAverage.clear()
     default_nodes = setNodes(option("Nodes"), i)
     
     rootMoves = list(rootPos.legal_moves)

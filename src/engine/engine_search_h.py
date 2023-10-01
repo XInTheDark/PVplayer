@@ -124,13 +124,15 @@ class Value:
 
 class RunningAverage:
     max_count = 1024
+    default_value = 0
     total = 0
     count = 0
     values = deque()
     
-    def __init__(self, max_count: int = 1024):
+    def __init__(self, max_count: int = 1024, default_value: int = 0):
         assert max_count > 0
         self.max_count = max_count
+        self.default_value = default_value
     
     def add(self, value):
         self.total += value
@@ -141,7 +143,7 @@ class RunningAverage:
         self.values.append(value)
     
     def value(self):
-        return self.total / self.count if self.count > 0 else 0
+        return self.total / self.count if self.count > 0 else self.default_value
     
     def clear(self):
         self.total = 0
