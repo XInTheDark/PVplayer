@@ -85,11 +85,13 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             # use the engine's timeman
             info: chess.engine.InfoDict = __engine__(pos=rootPos, timeMan=timeman)
             score = Value(info["score"])
+            nps = info["nps"] if "nps" in info else None
             bestPv = info["pv"]
             bestMove = bestPv[0]
             
             printf(
                 f"info depth 0 seldepth {info['depth']} score cp {score.__uci_str__()} nodes {info['nodes']} "
+                f"{f'nps {nps} ' if nps else ''}"
                 f"time {int(info['time'] * 1000)} pv {utils.pv_to_uci(bestPv)}")
             if len(bestPv) <= 1:
                 printf(f"bestmove {bestMove}")
@@ -548,4 +550,5 @@ def engine_is_alive():
 
 def Nps():
     nps = int(npsAverage.value())
+    nps = max(nps, 10000)
     return nps
