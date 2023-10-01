@@ -336,7 +336,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         except Exception:
             pass
         
-        if i - prevPvRecalcIter > 2:
+        if i <= 10 or i - prevPvRecalcIter > 2:
             printf(
                 f"info depth {i} seldepth {depth} score cp {bestValue.__uci_str__()} nodes {total_nodes} nps {Nps()} "
                 f"time {int(time_taken * 1000)} pv {utils.pv_to_uci(rootMovesPv[bestMove])}")
@@ -495,9 +495,9 @@ def setNodes(v, i: int):
         return v
     else:
         assert v == 'auto'
-        scale = (1000 - option("Nodes scale")) / (75.0 + 0.5 * i)
-        div = scale - math.log10(option("Threads")) - 2.0 * math.log10(i)
-        div = clamp(div, 0.10, 10.0)
+        scale = (1000 - option("Nodes scale")) / (60.0 + 0.5 * i)
+        div = 6.0 + scale - 2.5 * math.log10(option("Threads")) - 5.0 * math.log10(i)
+        div = clamp(div, 0.50, 20.0)
         return int(Nps() / div)
 
 

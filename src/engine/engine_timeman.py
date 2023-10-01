@@ -40,6 +40,7 @@ class Time:
     def init(self, us: chess.Color, ply: int):
         """Much of the calculation algorithm is derived from Stockfish."""
         self.us = us
+        them = not us
         
         if self.time[us] == 0:
             return
@@ -53,8 +54,16 @@ class Time:
         optExtra = utils.clamp(1.0 + 0.4 * math.log10(600 * self.inc[us] / self.time[us]), 1.0, 1.25) \
             if self.inc[us] > 0 else 0.8
         
+        # Use more time if we have much more time than the opponent
+        advExtra = 1.0
+        if 0 < self.time[them] < self.time[us]:
+            timeRatio = self.time[us] / self.time[them]
+            incRatio = self.inc[them] / self.inc[us]
+            advExtra = 1.0 + 0.2 * math.log10(timeRatio) + 0.1 * timeRatio - 1.0 * math.log10(incRatio)
+            advExtra = utils.clamp(advExtra, 1.0, 3.0)
+        
         optScale = min((0.88 + ply / 116.4) / 50,
-                       0.88 * self.time[us] / timeLeft) * optExtra
+                       0.88 * self.time[us] / timeLeft) * optExtra * advExtra
         maxScale = min(3.0 + 0.05 * ply, 6.5)
         
         # Never use more than x% of the available time for this move (scale based on ply)
