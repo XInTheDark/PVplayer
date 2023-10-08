@@ -1,0 +1,16 @@
+name: Run PVengine (startpos, depth 3)
+run-name: Run PVengine on startpos @ depth 3
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: src/engine
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Install requirements
+        run: pip3 install -r requirements.txt
+      - run: python3 engine_main.py go depth 3
