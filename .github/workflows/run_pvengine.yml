@@ -1,5 +1,5 @@
-name: Run PVengine (startpos, depth 2)
-run-name: Run PVengine on startpos @ depth 2
+name: Run PVengine (startpos, depth 3)
+run-name: Run PVengine on startpos @ depth 3
 on: [push, pull_request]
 jobs:
   build:
@@ -13,4 +13,4 @@ jobs:
         uses: actions/checkout@v3
       - name: Install requirements
         run: pip3 install -r requirements.txt
-      - run: echo 'go depth 2' | python3 engine_main.py
+      - run: python3 engine_main.py go depth 3
