@@ -6,6 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/engine
+        working-directory: /src/engine
     steps:
       - run: echo 'go' | python3 engine_main.py
