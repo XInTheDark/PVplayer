@@ -8,5 +8,5 @@ jobs:
 #      run:
 #        working-directory: src/engine
     steps:
-      - run: ls -d -- */
+      - run: ls -d */
       - run: echo 'go' | python3 engine_main.py
