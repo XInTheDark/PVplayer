@@ -5,5 +5,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: cd src/engine
+      - run: cd /src/engine
       - run: echo 'go' | python3 engine_main.py
