@@ -4,6 +4,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/engine
     steps:
-      - run: cd ./src/engine
       - run: echo 'go' | python3 engine_main.py
