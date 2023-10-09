@@ -1,5 +1,5 @@
 name: Build PVengine
-run-name: Build PVengine executable
+run-name: Build PVengine executables
 on:
   push:
     branches:
@@ -23,10 +23,18 @@ jobs:
         run: pip3 install -r requirements.txt
       - run: pip3 install pyinstaller
       - run: pip3 install cx_Freeze
+
       - name: Build with pyinstaller
         run: sh build.sh
       - name: Test executable
         run: ./build/pvengine bench
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: pvengine-linux
+          path: build/pvengine
+
       - name: Build with cx_Freeze
         run: sh build_fast.sh
       - name: Test executable
@@ -46,10 +54,18 @@ jobs:
         run: pip3 install -r requirements.txt
       - run: pip3 install pyinstaller
       - run: pip3 install cx_Freeze
+
       - name: Build with pyinstaller
         run: sh build.sh
       - name: Test executable
         run: ./build/pvengine bench
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: pvengine-macos
+          path: build/pvengine
+
       - name: Build with cx_Freeze
         run: sh build_fast.sh
       - name: Test executable
@@ -68,11 +84,41 @@ jobs:
         run: pip install -r requirements.txt
       - run: pip install pyinstaller
       - run: pip install cx_Freeze
+
       - name: Build with pyinstaller
         run: python -m PyInstaller --onefile -n pvengine --distpath build main.py
       - name: Test executable
         run: ./build/pvengine.exe bench
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: pvengine-windows
+          path: build/pvengine.exe
+
       - name: Build with cx_Freeze
         run: python -m cx_Freeze -c main.py --target-dir=build --target-name=pvengine
       - name: Test executable
         run: ./build/pvengine.exe bench
+
+  publish_prelease:
+    name: Publish prelease
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: src/engine
+    if: github.ref_name == 'master' && env.CHANGES == '0'
+    continue-on-error: true
+    steps:
+      - name: Upload binaries
+        uses: softprops/action-gh-release@v1
+        with:
+          name: PVengine dev-${{ env.COMMIT_DATE }}-${{ env.COMMIT_SHA }}
+          tag_name: pvengine-dev-${{ env.COMMIT_DATE }}-${{ env.COMMIT_SHA }}
+          prerelease: true
+          files: |
+            pvengine-linux
+            pvengine-macos
+            pvengine-windows
+
