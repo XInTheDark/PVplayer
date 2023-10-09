@@ -33,12 +33,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: pvengine-linux
-          path: src/engine/build/pvengine
+          path: src/engine/build/pvengine-linux
 
       - name: Build with cx_Freeze
         run: sh build_fast.sh
       - name: Test executable
-        run: ./build/pvengine bench
+        run: ./build/pvengine-linux bench
 
   build_macos:
     name: Build & test on MacOS
@@ -58,13 +58,13 @@ jobs:
       - name: Build with pyinstaller
         run: sh build.sh
       - name: Test executable
-        run: ./build/pvengine bench
+        run: ./build/pvengine-macos bench
 
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
           name: pvengine-macos
-          path: src/engine/build/pvengine
+          path: src/engine/build/pvengine-macos
 
       - name: Build with cx_Freeze
         run: sh build_fast.sh
@@ -111,6 +111,24 @@ jobs:
     if: github.ref_name == 'main'
     continue-on-error: true
     steps:
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pvengine-linux
+      - name: Download MacOS artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pvengine-macos
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pvengine-windows
+
+      - name: Get commit date
+        run: echo "COMMIT_SHA=$(git rev-parse HEAD | cut -c 1-8)" >> $GITHUB_ENV
+      - name: Get commit SHA
+        run: echo "COMMIT_DATE=$(git show -s --date=format:'%Y%m%d' --format=%cd HEAD)" >> $GITHUB_ENV
+
       - name: Upload binaries
         uses: softprops/action-gh-release@v1
         with:
@@ -120,5 +138,5 @@ jobs:
           files: |
             pvengine-linux
             pvengine-macos
-            pvengine-windows
+            pvengine.exe
 
