@@ -15,12 +15,11 @@ npsAverage = RunningAverage(max_count=10, default_value=1000000 * option("Thread
 
 
 def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DEPTH(),
-           depth: int = None, nodes: int = None, movetime: int = None,
-           timeman: Time = Time()):
+           nodes: int = None, movetime: int = None, timeman: Time = Time()):
     """
     Search a position by tracing the PV.
     
-    param depth: Maximum number of iterations
+    param MAX_ITERS: Maximum number of iterations
     param nodes: Maximum number of *total* nodes across all iterations
     param time: Maximum time *per move*
     """
@@ -544,7 +543,7 @@ def stop_search(optTime=False, maxTime=False):
 
 def engine_is_alive():
     try:
-        engine_engine.engine.ping()
+        evaluate.engine.ping()
         return True
     except Exception:
         return False

@@ -17,6 +17,7 @@ from evaluate import engine
 from timeman import Time
 from utils import *
 from search_h import *
+from benchmark import bench
 
 # threads
 search_thread = None
@@ -150,6 +151,11 @@ def handle_command(command: str):
             search.stop_search()
             search_thread.join(timeout=0.5)
         os._exit(0)
+
+    # bench
+    elif command.startswith("bench"):
+        depth = int(command.split(" ")[1])
+        bench(depth)
 
     # option setting
     elif command.startswith("setoption"):

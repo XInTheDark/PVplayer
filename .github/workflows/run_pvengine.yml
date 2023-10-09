@@ -1,5 +1,5 @@
-name: Run PVengine (startpos, depth 3)
-run-name: Run PVengine on startpos @ depth 3
+name: Bench (startpos, depth 3)
+run-name: Benchmark PVengine on startpos @ depth 3
 on:
   push:
     branches:
@@ -21,8 +21,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Install requirements
         run: pip3 install -r requirements.txt
-      - run: python3 main.py go depth 3
-      - run: python3 main.py go wtime 10000 winc 1000
+      - run: python3 main.py bench 3
+
   build_windows:
     name: Test on Windows
     runs-on: windows-latest
@@ -35,8 +35,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Install requirements
         run: pip install -r requirements.txt
-      - run: python main.py go depth 3
-      - run: python main.py go wtime 10000 winc 1000
+      - run: python main.py bench 3
+
   build_macos:
     name: Test on MacOS
     runs-on: macos-latest
@@ -49,5 +49,4 @@ jobs:
         uses: actions/checkout@v3
       - name: Install requirements
         run: pip3 install -r requirements.txt
-      - run: python3 main.py go depth 3
-      - run: python3 main.py go wtime 10000 winc 1000
+      - run: python3 main.py bench 3
