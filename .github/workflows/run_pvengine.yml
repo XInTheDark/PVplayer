@@ -1,6 +1,13 @@
 name: Run PVengine (startpos, depth 3)
 run-name: Run PVengine on startpos @ depth 3
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+
 jobs:
   build_linux:
     name: Test on Linux (Ubuntu)
