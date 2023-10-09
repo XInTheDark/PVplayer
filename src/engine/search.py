@@ -416,7 +416,10 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         i += 1
 
     # After search is finished
-    bestPv = rootMovesPv[bestMove]
+    try:
+        bestPv = rootMovesPv[bestMove]
+    except KeyError:
+        bestPv = [bestMove]
     if len(bestPv) <= 1:
         printf(f"bestmove {bestMove}")
     else:
