@@ -3,27 +3,27 @@ import math
 import chess
 import chess.engine
 
-from engine_ucioption import *
+from ucioption import *
 
 
 def push_pv(pos: chess.Board, pv, info=None, is_tb=False):
     board = pos.copy()
     if pv is None or not pv:
         return board
-    
+
     if type(pv) == str:
         pv = pv.split('pv')[-1]
         pv = pv.split()
-        
+
         pv = [chess.Move.from_uci(move) for move in pv]
-    
+
     for move in pv:
         if not board.is_legal(move):
             break
         board.push(move)
         if board.is_game_over():
             break
-    
+
     return board
 
 
@@ -33,7 +33,7 @@ def cp_to_score(cp):
         if cp.is_mate():
             return str(cp.white())
         s = str(cp.white())
-        
+
         if s[0] == '+':
             s = s[1:]
             return f"+{int(s) / 100}"
@@ -71,7 +71,7 @@ def pv_to_uci(pv):
     s = ""
     for move in pv:
         s += f"{move.uci()} "
-    
+
     # remove the last space
     return s[:-1]
 

@@ -43,12 +43,12 @@ It then chooses the move with the best PV evaluation.
 ### Sample usage
 ```
 cd src/engine
-python3 engine_main.py
+python3 main.py
 ```
 
 ### Building
-A shell script for building an executable for the engine (on Linux-based systems) is available at `engine_build.sh`, 
-which uses pyinstaller. To build a faster executable (especially at startup), use `engine_build_fast.sh` instead.
+A shell script for building an executable for the engine (on Linux-based systems) is available at `build.sh`, 
+which uses pyinstaller. To build a faster executable (especially at startup), use `build_fast.sh` instead.
 The scripts can be slightly modified for building on Windows as well.
 
 ### Configuration

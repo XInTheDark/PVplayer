@@ -1,8 +1,8 @@
-import engine_uci
+import uci
 
 
 def main():
-    engine_uci.uci()
+    uci.uci()
 
 
 if __name__ == "__main__":

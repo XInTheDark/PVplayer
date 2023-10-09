@@ -2,7 +2,8 @@ name: Run PVengine (startpos, depth 3)
 run-name: Run PVengine on startpos @ depth 3
 on: [push, pull_request]
 jobs:
-  build:
+  build_linux:
+    name: Test on Linux (Ubuntu)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -13,4 +14,32 @@ jobs:
         uses: actions/checkout@v3
       - name: Install requirements
         run: pip3 install -r requirements.txt
-      - run: python3 engine_main.py go depth 3
+      - run: python3 main.py go depth 3
+      - run: python3 main.py go wtime 10000 winc 1000
+  build_windows:
+    name: Test on Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: src/engine
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - run: python main.py go depth 3
+      - run: python main.py go wtime 10000 winc 1000
+  build_macos:
+    name: Test on MacOS
+    runs-on: macos-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: src/engine
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Install requirements
+        run: pip3 install -r requirements.txt
+      - run: python3 main.py go depth 3
+      - run: python3 main.py go wtime 10000 winc 1000
