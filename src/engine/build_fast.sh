@@ -3,7 +3,7 @@
 # Delete current build folder
 rm -rf build
 
-cxfreeze -c engine_main.py --target-dir=build --target-name=pvengine
+cxfreeze -c main.py --target-dir=build --target-name=pvengine
 
 # Delete frozen_application_license.txt
 rm build/frozen_application_license.txt
