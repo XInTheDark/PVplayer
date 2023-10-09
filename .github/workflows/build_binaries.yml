@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: pvengine-linux
-          path: ./build/pvengine
+          path: src/engine/build/pvengine
 
       - name: Build with cx_Freeze
         run: sh build_fast.sh
@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: pvengine-macos
-          path: ./build/pvengine
+          path: src/engine/build/pvengine
 
       - name: Build with cx_Freeze
         run: sh build_fast.sh
@@ -94,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: pvengine-windows
-          path: ./build/pvengine.exe
+          path: src/engine/build/pvengine.exe
 
       - name: Build with cx_Freeze
         run: python -m cx_Freeze -c main.py --target-dir=build --target-name=pvengine
