@@ -29,6 +29,9 @@ jobs:
       - name: Test executable
         run: ./build/pvengine bench
 
+      - name: Rename executable
+        run: mv build/pvengine build/pvengine-linux
+
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
@@ -38,7 +41,7 @@ jobs:
       - name: Build with cx_Freeze
         run: sh build_fast.sh
       - name: Test executable
-        run: ./build/pvengine-linux bench
+        run: ./build/pvengine bench
 
   build_macos:
     name: Build & test on MacOS
@@ -58,7 +61,10 @@ jobs:
       - name: Build with pyinstaller
         run: sh build.sh
       - name: Test executable
-        run: ./build/pvengine-macos bench
+        run: ./build/pvengine bench
+
+      - name: Rename executable
+        run: mv build/pvengine build/pvengine-macos
 
       - name: Upload executable
         uses: actions/upload-artifact@v3
@@ -90,11 +96,14 @@ jobs:
       - name: Test executable
         run: ./build/pvengine.exe bench
 
+      - name: Rename executable
+        run: mv build/pvengine.exe build/pvengine-windows.exe
+
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
           name: pvengine-windows
-          path: src/engine/build/pvengine.exe
+          path: src/engine/build/pvengine-windows.exe
 
       - name: Build with cx_Freeze
         run: python -m cx_Freeze -c main.py --target-dir=build --target-name=pvengine
@@ -138,5 +147,5 @@ jobs:
           files: |
             pvengine-linux
             pvengine-macos
-            pvengine.exe
+            pvengine-windows.exe
 
