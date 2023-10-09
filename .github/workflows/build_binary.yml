@@ -72,8 +72,8 @@ jobs:
       - name: Build with pyinstaller
         run: python -m PyInstaller --onefile -n pvengine --distpath build main.py
       - name: Test executable
-        run: build/pvengine.exe bench
+        run: ./build/pvengine.exe bench
       - name: Build with cx_Freeze
         run: python -m cx_Freeze -c main.py --target-dir=build --target-name=pvengine
       - name: Test executable
-        run: build/pvengine.exe bench
+        run: ./build/pvengine.exe bench
