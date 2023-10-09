@@ -3,7 +3,7 @@
 Welcome to the PVplayer project! We are excited that you are interested in contributing. This document outlines the guidelines and steps to follow when making contributions to PVplayer.
 
 ## Building PVplayer
-For developers, simply run the python file `engine_main.py` in `src/engine` to get started.
+For developers, simply run the python file `main.py` in `src/engine` to get started.
 
 ## Making Contributions
 ### Reporting bugs and issues

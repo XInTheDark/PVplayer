@@ -12,11 +12,12 @@ import threading
 
 import chess.engine
 
-import engine_search
-from engine_engine import engine
-from engine_timeman import Time
-from engine_utils import *
-from engine_search_h import *
+import search
+from evaluate import engine
+from timeman import Time
+from utils import *
+from search_h import *
+from benchmark import bench
 
 # threads
 search_thread = None
@@ -41,7 +42,7 @@ def fen_from_str(s: str):
     output: ['3R4/r7/3k2P1/3p4/2pP4/1b2PK1N/5P2/8 b - - 3 48', 'moves d6g7']
     where the first element in the list is the FEN and the remaining is the rest of the string.
     """
-    
+
     if "moves" in s:
         s = s.split(" moves ")
         fen = s[0]
@@ -49,7 +50,7 @@ def fen_from_str(s: str):
     else:
         fen = s
         moves = ""
-    
+
     return [fen, moves]
 
 
@@ -59,9 +60,9 @@ def handle_command(command: str):
     if command == "":
         return
     search_thread = None
-    
+
     tm = Time()  # initialize new timeman object
-    
+
     if command == "uci":
         printf(f"id name {ENGINE_NAME}")
         printf(f"id author {ENGINE_AUTHOR}")
@@ -104,53 +105,58 @@ def handle_command(command: str):
         pos = chess.Board(fen)
     elif command.startswith("go"):
         MAX_ITERS = GET_MAX_DEPTH()
-        
+
         if command.strip() == "go":
             MAX_ITERS = 10
-        
+
         has_arg = command.split(" ").__len__() > 1
         args = command.split(" ")
         keyword = command.split(" ")[1] if has_arg else None
-        
+
         if has_arg and keyword == "movetime":
             movetime = int(command.split(" ")[2])
         else:
             movetime = None
-        
+
         if has_arg and keyword == "nodes":
             nodes = int(command.split(" ")[2])
         else:
             nodes = None
-        
+
         if has_arg and keyword == "depth":
             MAX_ITERS = int(command.split(" ")[2])
-        
+
         if has_arg and keyword == "infinite":
             MAX_ITERS = GET_MAX_DEPTH()
-        
+
         if has_arg and ("wtime" in args or "btime" in args):
             wtime, btime, winc, binc = process_time(args)
             tm.__init__(wtime, btime, winc, binc)
-        
+
         # start search
         search_thread = threading.Thread(target=start_search, args=(pos, option("MAX_MOVES"), MAX_ITERS,
                                                                     movetime, nodes, tm))
         search_thread.start()
-    
+
     # stop
     elif command == "stop":
-        engine_search.stop_search()
+        search.stop_search()
         if search_thread:
             search_thread.join(timeout=0.5)
             search_thread = None
-    
+
     # quit
     elif command == "quit":
         if search_thread:
-            engine_search.stop_search()
+            search.stop_search()
             search_thread.join(timeout=0.5)
         os._exit(0)
-    
+
+    # bench
+    elif command.startswith("bench"):
+        depth = int(command.split(" ")[1])
+        bench(depth)
+
     # option setting
     elif command.startswith("setoption"):
         # FORMAT: name <id> value <x>
@@ -165,7 +171,7 @@ def handle_command(command: str):
             value_index = c.__len__()
         name = " ".join(c[2:value_index])
         value = " ".join(c[value_index + 1:])
-        
+
         # set the option
         try:
             setoption(name, value)
@@ -173,12 +179,12 @@ def handle_command(command: str):
             printf(f"No such option: '{name}'. Type 'uci' for all options.")
         except Exception as e:
             printf(f"Failed to set option: '{name}'. Error: {e}")
-    
+
     elif command == "d":
         printf(pos.__str__() + "\n")
         printf(f"FEN: {pos.fen()}")
         printf(f"Checkers: {','.join([chess.square_name(sq) for sq in pos.checkers()])}")
-        
+
     else:
         printf(f"Unknown command: '{command}'.")
         return
@@ -193,10 +199,10 @@ def handle_commands():
         lst = ' '.join(sys.argv[1:]).split("\n")
         for command in lst:
             handle_command(command)
-        while engine_search.IS_SEARCHING:
+        while search.IS_SEARCHING:
             continue
         os._exit(0)
-    
+
     while True:
         try:
             command = preprocess(sys.stdin.readline())
@@ -206,10 +212,10 @@ def handle_commands():
 
 
 def start_search(pos, MAX_MOVES, MAX_ITERS, time, nodes, tm):
-    while engine_search.IS_SEARCHING:
+    while search.IS_SEARCHING:
         continue
-    
-    engine_search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
+
+    search.search(pos, MAX_MOVES=MAX_MOVES, MAX_ITERS=MAX_ITERS, movetime=time, nodes=nodes, timeman=tm)
 
 
 def uci():
@@ -219,7 +225,7 @@ def uci():
     global ENGINE_NAME
     ENGINE_NAME = engine_name_uci()
     printf(f"{ENGINE_NAME} by {ENGINE_AUTHOR}")
-    
+
     # Create a thread for handling UCI input
     uci_thread = threading.Thread(target=handle_commands)
     uci_thread.start()
@@ -232,22 +238,22 @@ def process_time(args: list):
         wtime = int(args[args.index("wtime") + 1])
     except ValueError:
         pass
-    
+
     try:
         btime = int(args[args.index("btime") + 1])
     except ValueError:
         pass
-    
+
     try:
         winc = int(args[args.index("winc") + 1])
     except ValueError:
         pass
-    
+
     try:
         binc = int(args[args.index("binc") + 1])
     except ValueError:
         pass
-    
+
     return wtime, btime, winc, binc
 
 
@@ -271,6 +277,6 @@ def engine_name_uci():
 
 @atexit.register
 def on_exit():
-    engine_search.stop_search()
+    search.stop_search()
     if engine is not None:
         engine.quit()
