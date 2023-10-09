@@ -154,7 +154,10 @@ def handle_command(command: str):
 
     # bench
     elif command.startswith("bench"):
-        depth = int(command.split(" ")[1])
+        try:
+            depth = int(command.split(" ")[1])
+        except Exception:
+            depth = 3
         bench(depth)
 
     # option setting

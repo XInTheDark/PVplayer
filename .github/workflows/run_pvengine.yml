@@ -9,7 +9,7 @@ on:
       - '*'
 
 jobs:
-  build_linux:
+  bench_linux:
     name: Test on Linux (Ubuntu)
     runs-on: ubuntu-latest
     defaults:
@@ -23,21 +23,7 @@ jobs:
         run: pip3 install -r requirements.txt
       - run: python3 main.py bench 3
 
-  build_windows:
-    name: Test on Windows
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: cmd
-        working-directory: src/engine
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-      - name: Install requirements
-        run: pip install -r requirements.txt
-      - run: python main.py bench 3
-
-  build_macos:
+  bench_macos:
     name: Test on MacOS
     runs-on: macos-latest
     defaults:
@@ -50,3 +36,17 @@ jobs:
       - name: Install requirements
         run: pip3 install -r requirements.txt
       - run: python3 main.py bench 3
+
+  bench_windows:
+    name: Test on Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+        working-directory: src/engine
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - run: python main.py bench 3

@@ -4,7 +4,7 @@
 rm pvengine
 rm build/pvengine
 
-pyinstaller engine_main.py --onefile -n pvengine
+pyinstaller main.py --onefile -n pvengine
 
 # Path: src/dist/pvengine
 
