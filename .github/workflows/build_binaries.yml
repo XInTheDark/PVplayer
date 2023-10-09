@@ -108,7 +108,7 @@ jobs:
       run:
         shell: bash
         working-directory: src/engine
-    if: github.ref_name == 'master' && env.CHANGES == '0'
+    if: github.ref_name == 'main' && env.CHANGES == '0'
     continue-on-error: true
     steps:
       - name: Upload binaries
