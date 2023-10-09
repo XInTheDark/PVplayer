@@ -28,6 +28,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
+        shell: cmd
         working-directory: src/engine
     steps:
       - name: Checkout Repo
