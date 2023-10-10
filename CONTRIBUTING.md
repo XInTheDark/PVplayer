@@ -21,4 +21,4 @@ _First time contributors should add their name to the AUTHORS file._
 We do not have a strict code style. But it is best to stick to the existing style of the file you are editing.
 
 ---
-Thank you for contributing to Stockfish and helping us make it even better!
+Thank you for contributing to PVplayer and helping us make it even better!
