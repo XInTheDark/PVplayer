@@ -21,8 +21,7 @@ def download_stockfish():
     # get system type
     system = platform.system()
     if system == "Windows":
-        # download from https://github.com/official-stockfish/Stockfish/releases/download/sf_16/stockfish-windows-x86-64-modern.zip
-        # and extract to stockfish.exe
+        # download and extract to stockfish.exe
 
         # Download file
         print("Downloading...")

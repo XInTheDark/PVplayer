@@ -26,7 +26,8 @@ def init_engine():
         ENGINE_MISSING = True
 
     try:
-        engine.analyse(chess.Board(), chess.engine.Limit(nodes=1))
+        info = engine.analyse(chess.Board(), chess.engine.Limit(time=1.0))
+        x = info["pv"]; move = x[0]
     except Exception:
         ENGINE_MISSING = True
 
