@@ -99,6 +99,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
             IS_SEARCHING = False
             return
 
+    print('ok')
     info: chess.engine.InfoDict
     if option("Nodes") != "auto":
         info = __engine__(pos=rootPos, nodes=default_nodes)
