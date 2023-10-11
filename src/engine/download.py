@@ -2,9 +2,12 @@
 import os, platform, zipfile
 import urllib.request
 
-URL_WINDOWS = "https://github.com/official-stockfish/Stockfish/releases/download/sf_16/stockfish-windows-x86-64-modern.zip"
-URL_LINUX = "https://github.com/official-stockfish/Stockfish/releases/download/sf_16/stockfish-ubuntu-x86-64-modern.tar"
-URL_MACOS = "https://github.com/official-stockfish/Stockfish/releases/download/sf_16/stockfish-macos-x86-64-modern.tar"
+SF_RELEASE = "stockfish-dev-20231010-00263636"
+DOWNLOAD = "https://github.com/official-stockfish/Stockfish/releases/download"
+
+URL_WINDOWS = f"{DOWNLOAD}/{SF_RELEASE}/stockfish-windows-x86-64-modern.zip"
+URL_LINUX = f"{DOWNLOAD}/{SF_RELEASE}/stockfish-ubuntu-x86-64-modern.tar"
+URL_MACOS = f"{DOWNLOAD}/{SF_RELEASE}/stockfish-macos-x86-64-modern.tar"
 
 
 def download_stockfish():
