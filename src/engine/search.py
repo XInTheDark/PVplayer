@@ -45,8 +45,6 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     useTimeMan = optTime != 0 or maxTime != 0
     startTime = time_now()
 
-    print('ok')
-
     if optTime:
         if option("debug"):
             printf(f"info string Timeman: Optimal time {optTime}ms")
@@ -60,7 +58,6 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
 
     i = 1
     total_nodes = 0
-    # npsAverage.clear()
     default_nodes = setNodes(option("Nodes"), i)
 
     rootMoves = list(rootPos.legal_moves)
@@ -74,6 +71,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
 
     # If we likely don't have enough time to search all moves, only use root engine eval
     if useTimeMan:
+        print('??')
         # Special case: When we are under time control, and only one legal move, return immediately
         if rootMovesSize == 1:
             bestMove = rootMoves[0]
