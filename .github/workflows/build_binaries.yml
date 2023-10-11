@@ -94,7 +94,7 @@ jobs:
       - name: Build with pyinstaller
         run: python -m PyInstaller --onefile -n pvengine --distpath build main.py
       - name: Test executable
-        run: echo 'bench' | ./build/pvengine.exe
+        run: Start-Process ./build/pvengine.exe -ArgumentList "bench" -Wait
 
       - name: Rename executable
         run: mv build/pvengine.exe build/pvengine-windows.exe
@@ -108,7 +108,7 @@ jobs:
       - name: Build with cx_Freeze
         run: python -m cx_Freeze -c main.py --target-dir=build --target-name=pvengine
       - name: Test executable
-        run: echo 'bench' | ./build/pvengine.exe
+        run: Start-Process ./build/pvengine.exe -ArgumentList "bench" -Wait
 
   publish_prelease:
     name: Publish prelease
