@@ -23,7 +23,7 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
     param nodes: Maximum number of *total* nodes across all iterations
     param time: Maximum time *per move*
     """
-    print("search")
+
     global STOP_SEARCH, npsAverage, IS_SEARCHING
     global OPTTIME, MAXTIME
 
@@ -44,6 +44,8 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
 
     useTimeMan = optTime != 0 or maxTime != 0
     startTime = time_now()
+
+    print('ok')
 
     if optTime:
         if option("debug"):

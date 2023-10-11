@@ -195,14 +195,6 @@ def handle_command(command: str):
 
 def handle_commands():
     global search_thread, pos, tm
-    print(sys.argv)
-    print(sys.argv)
-    print(sys.argv)
-    print(sys.argv)
-    print(sys.argv)
-
-
-
 
     pos = chess.Board()
     tm = Time()
