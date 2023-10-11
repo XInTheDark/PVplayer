@@ -2,7 +2,7 @@
 import os, platform, zipfile
 import urllib.request
 
-SF_RELEASE = "stockfish-dev-20231010-00263636"
+SF_RELEASE = "sf_16"
 DOWNLOAD = "https://github.com/official-stockfish/Stockfish/releases/download"
 
 URL_WINDOWS = f"{DOWNLOAD}/{SF_RELEASE}/stockfish-windows-x86-64-modern.zip"
