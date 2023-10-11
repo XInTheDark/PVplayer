@@ -48,4 +48,4 @@ jobs:
         uses: actions/checkout@v3
       - name: Install requirements
         run: pip install -r requirements.txt
-      - run: Start-Process python -ArgumentList "main.py bench 3" -Wait
+      - run: python main.py bench 3
