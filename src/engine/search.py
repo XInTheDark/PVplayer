@@ -468,28 +468,26 @@ def calc_nodes(move: chess.Move, bestValue: Value, i: int, default_nodes: int, p
     if is_best or (prevEval and prevEval >= bestValue):
         scale *= 1.3
 
-    # Use more nodes for the first few iterations (also important for accuracy in pruning)
-    if i <= 3:
-        scale *= 1.5
-
     # based on score difference
     if prevEval is not None:
         scoreDiff = max(bestValue - prevEval, 0)
-        scale *= clamp(1.5 - (scoreDiff / 125.0), 0.8, 1.4)
+        scale *= clamp(1.5 - (scoreDiff / 125.0), 0.4, 1.2)
 
     # promising
     promisingScale = max(2.0 * math.log10(max(10 * promisingValue - 2, 1.0)),
-                         min(0.2 + i * 0.005, 0.75))
+                         min(0.2 + i * 0.005, 0.75)
+                         )
     scale *= promisingScale
 
     if move in rootMovesExtraNodes.keys():
         scale *= rootMovesExtraNodes[move]
 
-    scale = clamp(scale, 0.01, 10.0)  # cap min and max scale just in case
-    return int(default_nodes * scale)
+    scale = clamp(scale, 0.01, 5.0)
+    nodes = int(default_nodes * scale)
+    return nodes
 
 
-def setNodes(v, i: int):
+def setNodes(v, i: int, num_moves: int = 20):
     """Set default_nodes based on UCI input.
     This value is either an integer or 'auto'."""
     if type(v) == int:
@@ -497,9 +495,11 @@ def setNodes(v, i: int):
     else:
         assert v == 'auto'
         scale = (1000 - option("Nodes scale")) / (60.0 + 0.5 * i)
-        div = 6.0 + scale - 2.5 * math.log10(option("Threads")) - 5.0 * math.log10(i)
-        div = clamp(div, 0.50, 20.0)
-        return int(Nps() / div)
+        div = (6.0 + scale - 2.5 * math.log10(option("Threads"))
+               - 5.0 * math.log10(i) + 5.0 * math.log10(num_moves))
+        div = clamp(div, 0.50, 32.0)
+        nodes = int(Nps() / div)
+        return nodes
 
 
 def promising(move: chess.Move, rootMovesEval: dict, rootMovesSize: int, i: int, is_best: bool,
