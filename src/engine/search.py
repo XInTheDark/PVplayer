@@ -52,13 +52,10 @@ def search(rootPos: chess.Board, MAX_MOVES=GET_MAX_MOVES(), MAX_ITERS=GET_MAX_DE
         if option("debug"):
             printf(f"info string Timeman: Maximum time {maxTime}ms")
 
-    # Initialise engine if not already initialised
-    if not engine_is_alive():
-        init_engine()
+    init_engine()
 
     i = 1
     total_nodes = 0
-    # npsAverage.clear()
     default_nodes = setNodes(option("Nodes"), i)
 
     rootMoves = list(rootPos.legal_moves)
@@ -542,6 +539,7 @@ def stop_search(optTime=False, maxTime=False):
 
 
 def engine_is_alive():
+    # not reliable (especially on Windows)
     try:
         evaluate.engine.ping()
         return True

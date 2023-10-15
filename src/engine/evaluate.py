@@ -15,6 +15,15 @@ engine_options = {
 
 def init_engine():
     global engine
+
+    # check if engine is alive
+    try:
+        info = engine.analyse(chess.Board(), chess.engine.Limit(nodes=10))
+        pv = info["pv"]
+        return
+    except Exception:
+        pass
+
     if engine is not None:
         engine.quit()
 
@@ -26,7 +35,7 @@ def init_engine():
         ENGINE_MISSING = True
 
     try:
-        engine.analyse(chess.Board(), chess.engine.Limit(nodes=1))
+        info = engine.analyse(chess.Board(), chess.engine.Limit(nodes=10))
     except Exception:
         ENGINE_MISSING = True
 

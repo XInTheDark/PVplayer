@@ -195,6 +195,7 @@ def handle_command(command: str):
 
 def handle_commands():
     global search_thread, pos, tm
+
     pos = chess.Board()
     tm = Time()
     if len(sys.argv) > 1:
